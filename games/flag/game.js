@@ -88,25 +88,15 @@ function playSound(type) {
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('flagle_theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+// O tema (claro/escuro) é controlado por js/theme.js, compartilhado com a plataforma.
+// Aqui só falta tocar o som de clique no botão de tema.
+themeToggle.addEventListener('click', () => playSound('click'));
 
+window.addEventListener('DOMContentLoaded', () => {
     const savedFont = localStorage.getItem('flagle_font') || 'medium';
     document.documentElement.setAttribute('data-font', savedFont);
     document.getElementById('font-size-select').value = savedFont;
 });
-
-function toggleTheme() {
-    playSound('click');
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', newTheme);
-    themeToggle.textContent = newTheme === 'dark' ? '🌙' : '☀️';
-    localStorage.setItem('flagle_theme', newTheme);
-}
 
 function toggleSettings() {
     playSound('click');
@@ -347,7 +337,6 @@ document.getElementById('hint-btn').addEventListener('click', showHint);
 guessBtn.addEventListener('click', handleAction);
 nextBtn.addEventListener('click', handleRoundAction);
 document.getElementById('back-btn').addEventListener('click', returnToMenu);
-themeToggle.addEventListener('click', toggleTheme);
 document.getElementById('settings-btn').addEventListener('click', toggleSettings);
 document.getElementById('font-size-select').addEventListener('change', (event) => changeFontSize(event.target.value));
 

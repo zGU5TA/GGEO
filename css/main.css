@@ -1,0 +1,83 @@
+/* =============================================================
+   GGEO — paleta, tema claro/escuro e base
+   -------------------------------------------------------------
+   Para refinar as cores, mexa SOMENTE nos valores --ggeo-* abaixo.
+   Todo o resto (superfícies, bordas, texto secundário) é derivado
+   deles e se ajusta sozinho nos dois temas.
+
+   O tema é escolhido por <html data-theme="dark|light">, definido
+   por js/theme.js. Sem esse atributo vale o tema escuro.
+   ============================================================= */
+
+:root {
+    /* Paleta — tema escuro (padrão) */
+    --ggeo-black: #000000;
+    --ggeo-beige: #E6D4BF;
+    --ggeo-green: #52723E;
+    --ggeo-orange: #FF7700;
+
+    /* Papéis: o que cada cor faz na interface */
+    --bg: var(--ggeo-black);
+    --fg: var(--ggeo-beige);
+    --accent: var(--ggeo-orange);       /* laranja: ação principal e destaques */
+    --on-accent: var(--ggeo-black);     /* texto sobre o laranja (contraste alto) */
+    --secondary: var(--ggeo-green);     /* verde: detalhes e estados "disponível" */
+
+    /* Derivados (não edite: recalculam a partir de --bg e --fg) */
+    --surface: color-mix(in srgb, var(--fg) 6%, var(--bg));
+    --surface-2: color-mix(in srgb, var(--fg) 11%, var(--bg));
+    --border: color-mix(in srgb, var(--fg) 28%, var(--bg));
+    --muted: color-mix(in srgb, var(--fg) 68%, var(--bg));
+    --input-bg: var(--bg);
+
+    /* Cores funcionais (certo/errado), independentes da marca */
+    --success: #2e7d32;
+    --error: #c62828;
+
+    /* Forma e tipografia */
+    --radius: 0;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Courier New", Courier, monospace;
+}
+
+/* Paleta — tema claro. Só muda o que a imagem da marca diferencia. */
+:root[data-theme="light"] {
+    --ggeo-green: #586352;
+    --ggeo-orange: #C4761D;
+
+    --bg: var(--ggeo-beige);
+    --fg: var(--ggeo-black);
+}
+
+/* ---------- Base ---------- */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
