@@ -1,0 +1,17 @@
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Dependências e logs (o projeto não usa Node hoje, mas evita acidentes)
+node_modules/
+*.log
+
+# Segredos: nunca versionar
+.env
+.env.*
