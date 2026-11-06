@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGEO — Play the World</title>
+    <meta name="description" content="GGEO: jogos de geografia para testar o que você sabe sobre países, bandeiras e mapas.">
+    <!-- Favicon vazio por enquanto; o definitivo virá do logotipo da GGEO. -->
+    <link rel="icon" href="data:,">
+
+    <!-- Tema aplicado antes de desenhar a página (evita piscar). Veja js/theme.js -->
+    <script src="js/theme.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="site-header">
+        <div class="page site-header__inner">
+            <!-- Logotipo provisório em texto. O logotipo oficial entra aqui depois. -->
+            <a class="wordmark" href="index.html" aria-label="GGEO, página inicial">GGEO</a>
+            <nav class="nav" aria-label="Principal">
+                <a href="#jogos">Jogos</a>
+                <a href="#sobre">Sobre</a>
+                <button class="icon-btn" type="button" data-theme-toggle>🌙</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="page hero">
+            <h1>Play the World.</h1>
+            <p>Jogos de geografia para testar o que você sabe sobre países, bandeiras e mapas, e descobrir lugares novos.</p>
+            <a class="btn btn-primary" href="#jogos">Ver jogos</a>
+        </section>
+
+        <section class="page section" id="jogos" aria-labelledby="jogos-titulo">
+            <h2 id="jogos-titulo">Jogos</h2>
+            <div id="catalog" class="catalog">
+                <noscript>Ative o JavaScript para ver a lista de jogos.</noscript>
+            </div>
+        </section>
+
+        <section class="page section about" id="sobre" aria-labelledby="sobre-titulo">
+            <h2 id="sobre-titulo">Sobre a GGEO</h2>
+            <p>A GGEO reúne jogos de geografia em um só lugar. Cada jogo é independente, mas todos compartilham a mesma identidade e funcionam no computador, no tablet e no celular.</p>
+            <ul>
+                <li>Os jogos principais são gratuitos.</li>
+                <li>A ideia é manter a experiência sem anúncios intrusivos.</li>
+                <li>A plataforma está no começo: novos jogos virão aos poucos.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="page">GGEO — Play the World.</div>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
