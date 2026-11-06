@@ -69,6 +69,12 @@ body {
     outline-offset: 2px;
 }
 
+/* No tema claro o laranja sobre o bege fica com ~2,4:1, abaixo dos 3:1
+   recomendados para o anel de foco do teclado; usa a cor do texto. */
+:root[data-theme="light"] :focus-visible {
+    outline-color: var(--fg);
+}
+
 .hidden {
     display: none !important;
 }

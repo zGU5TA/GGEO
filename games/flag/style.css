@@ -283,7 +283,8 @@ select:focus, input:focus {
 }
 
 .back-platform:hover {
-    color: var(--accent);
+    color: var(--fg);
+    text-decoration: underline;
 }
 
 .loader {

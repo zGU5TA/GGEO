@@ -79,7 +79,7 @@
             </div>
 
             <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn">💡 Pedir Dica (-1 Rodada sem bônus)</button>
-            <div id="hint-box" class="hint-box"></div>
+            <div id="hint-box" class="hint-box" aria-live="polite"></div>
 
             <div id="game-area">
                 <div class="input-group">
@@ -88,7 +88,7 @@
                 </div>
             </div>
 
-            <div id="message" class="message"></div>
+            <div id="message" class="message" role="status" aria-live="polite"></div>
             <button class="btn-primary" id="next-btn">Próxima Bandeira</button>
 
             <button class="back-menu-btn" id="back-btn">← Voltar ao Menu</button>
