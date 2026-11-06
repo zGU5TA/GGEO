@@ -271,6 +271,21 @@ select:focus, input:focus {
     color: var(--fg);
 }
 
+/* Link para voltar à página inicial da GGEO (tela de menu do jogo) */
+.back-platform {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    color: var(--muted);
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+}
+
+.back-platform:hover {
+    color: var(--accent);
+}
+
 .loader {
     color: var(--muted);
     font-style: italic;

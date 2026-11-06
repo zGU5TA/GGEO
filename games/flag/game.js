@@ -8,7 +8,36 @@ let activeCountries = [];
 let availableCountries = [];
 let currentCountry = null;
 let score = 0;
-let records = JSON.parse(localStorage.getItem('flagle_records')) || {};
+
+// Chaves do localStorage. Antes da GGEO o jogo se chamava Flagle e usava chaves
+// "flagle_*". Na primeira visita os valores antigos são COPIADOS para as chaves
+// novas (as antigas não são apagadas, para ser possível voltar atrás).
+const STORAGE = { records: 'ggeo_flag_records', font: 'ggeo_flag_font' };
+const LEGACY_STORAGE = { records: 'flagle_records', font: 'flagle_font' };
+
+function migrateLegacyStorage() {
+    try {
+        for (const name of Object.keys(STORAGE)) {
+            const old = localStorage.getItem(LEGACY_STORAGE[name]);
+            if (old !== null && localStorage.getItem(STORAGE[name]) === null) {
+                localStorage.setItem(STORAGE[name], old);
+            }
+        }
+    } catch (error) {
+        console.warn('Não foi possível migrar dados antigos do localStorage:', error);
+    }
+}
+
+function loadRecords() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE.records)) || {};
+    } catch (error) {
+        return {}; // dado corrompido ou localStorage bloqueado: começa sem recordes
+    }
+}
+
+migrateLegacyStorage();
+let records = loadRecords();
 let roundEnded = false;
 let isLost = false;
 let hintUsed = false;
@@ -93,7 +122,7 @@ function playSound(type) {
 themeToggle.addEventListener('click', () => playSound('click'));
 
 window.addEventListener('DOMContentLoaded', () => {
-    const savedFont = localStorage.getItem('flagle_font') || 'medium';
+    const savedFont = localStorage.getItem(STORAGE.font) || 'medium';
     document.documentElement.setAttribute('data-font', savedFont);
     document.getElementById('font-size-select').value = savedFont;
 });
@@ -106,7 +135,7 @@ function toggleSettings() {
 function changeFontSize(size) {
     playSound('click');
     document.documentElement.setAttribute('data-font', size);
-    localStorage.setItem('flagle_font', size);
+    localStorage.setItem(STORAGE.font, size);
 }
 
 window.addEventListener('click', function(e) {
@@ -267,7 +296,7 @@ function checkGuess() {
             scoreSpan.textContent = score;
             if (score > (records[selectedContinent] || 0)) {
                 records[selectedContinent] = score;
-                localStorage.setItem('flagle_records', JSON.stringify(records));
+                localStorage.setItem(STORAGE.records, JSON.stringify(records));
                 recordSpan.textContent = score;
             }
         } else {
