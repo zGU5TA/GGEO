@@ -50,8 +50,11 @@ async function loadCountries() {
     }
 }
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// O AudioContext só é criado no primeiro som (depois de um clique do jogador),
+// porque os navegadores bloqueiam áudio iniciado sem interação do usuário.
+let audioCtx = null;
 function playSound(type) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -199,7 +202,15 @@ function loadNewCountry() {
     };
     
     flagImg.onerror = () => {
+        // Falha de rede não é culpa do jogador: não zera a pontuação e oferece
+        // sortear outra bandeira, em vez de deixar o jogo travado.
         loader.textContent = "Erro ao carregar imagem.";
+        isLost = false;
+        roundEnded = true;
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+        nextBtn.textContent = "Tentar outra bandeira";
+        nextBtn.style.display = "block";
     };
 }
 
@@ -244,9 +255,12 @@ function timeOut() {
 }
 
 function checkGuess() {
-    clearInterval(timerInterval);
     const userGuess = guessInput.value;
+    // Campo vazio: não faz nada e o cronômetro continua correndo.
+    // (Antes o clearInterval vinha antes desta checagem e o tempo parava.)
     if (!userGuess.trim()) return;
+
+    clearInterval(timerInterval);
 
     const cleanGuess = normalizeString(userGuess);
     const correctMain = normalizeString(currentCountry.name);
@@ -322,11 +336,9 @@ guessInput.addEventListener("keypress", function(event) {
     }
 });
 
-nextBtn.addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        handleRoundAction();
-    }
-});
+// Não existe listener de Enter para o botão "Próxima": um <button> já dispara
+// "click" ao apertar Enter, e um segundo listener rodava a ação duas vezes
+// (sorteando dois países por vez).
 
 // Os botões eram ligados por onclick="..." no HTML. Como o script agora é um
 // módulo (suas funções não são globais), a ligação é feita aqui.
