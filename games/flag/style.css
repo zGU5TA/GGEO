@@ -32,11 +32,31 @@ body {
 }
 
 .top-controls {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
     gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.top-controls .lang-picker {
+    height: 36px;
+    min-height: 0;
+    background: var(--surface-2);
+}
+
+/* O estilo genérico de "select" mais abaixo (largura total, padding grande)
+   não vale para o seletor de idioma, que é compacto. */
+.top-controls .lang-picker select {
+    width: auto;
+    padding: 0 0.2rem;
+    border: 0;
+    background: transparent;
+    font-size: 0.85rem;
+}
+.top-controls .lang-picker select:focus {
+    outline: none; /* o foco aparece na borda do .lang-picker (focus-within) */
 }
 
 .icon-btn {
@@ -61,7 +81,7 @@ body {
 .settings-modal {
     display: none;
     position: absolute;
-    top: 3.5rem;
+    top: 4.5rem;
     right: 1rem;
     background-color: var(--surface);
     border: 1px solid var(--border);

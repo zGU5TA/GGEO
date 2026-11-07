@@ -1,3 +1,6 @@
+import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
+import { countryName, capitalName, matchesCountry } from '../../js/country-names.js';
+
 // A lista de países fica em data/countries.json, compartilhada entre os jogos.
 // import.meta.url resolve o caminho a partir deste arquivo, então funciona
 // em qualquer hospedagem (inclusive em subpastas, como no GitHub Pages).
@@ -42,6 +45,11 @@ let roundEnded = false;
 let isLost = false;
 let hintUsed = false;
 
+// Mensagem do resultado e dica são guardadas como DADOS (e não como texto pronto),
+// para poderem ser reescritas se a pessoa trocar de idioma no meio da rodada.
+let messageState = null; // { key: 'flag.correct' | 'flag.incorrect' | 'flag.timeout', hintNote: boolean }
+let hintVisible = false;
+
 let maxTime = 15;
 let currentTime = 15;
 let timerInterval = null;
@@ -74,7 +82,7 @@ async function loadCountries() {
         startBtn.disabled = false;
     } catch (error) {
         console.error('Falha ao carregar data/countries.json:', error);
-        menuMessage.textContent = "Não foi possível carregar a lista de países. Recarregue a página.";
+        setText(menuMessage, 'flag.loadError');
         menuMessage.className = "message error";
     }
 }
@@ -144,8 +152,34 @@ window.addEventListener('click', function(e) {
     }
 });
 
-function normalizeString(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+// Escreve a mensagem de resultado (acertou / errou / tempo) no idioma atual.
+function renderMessage() {
+    if (!messageState) {
+        messageDiv.textContent = "";
+        return;
+    }
+    const name = countryName(currentCountry, getLang());
+    let text = t(messageState.key, { name });
+    if (messageState.hintNote) text += t('flag.hintUsedNote');
+    messageDiv.textContent = text;
+}
+
+// Escreve a dica (capital + continente) no idioma atual.
+function renderHint() {
+    if (!hintVisible) {
+        hintBox.textContent = "";
+        hintBox.classList.remove('active');
+        return;
+    }
+    const lang = getLang();
+    hintBox.textContent = '';
+    const label = document.createElement('strong');
+    label.textContent = t('flag.hintLabel');
+    hintBox.append(label, ' ' + t('flag.hintBody', {
+        capital: capitalName(currentCountry, lang),
+        continent: t(`continent.${currentCountry.continent}`),
+    }));
+    hintBox.classList.add('active');
 }
 
 function startGame() {
@@ -160,7 +194,7 @@ function startGame() {
     }
 
     if (activeCountries.length === 0) {
-        alert("Não há países suficientes.");
+        alert(t('flag.noCountries'));
         return;
     }
 
@@ -193,16 +227,17 @@ function loadNewCountry() {
     clearInterval(timerInterval);
     roundEnded = false;
     hintUsed = false;
-    hintBox.classList.remove('active');
-    hintBox.textContent = "";
-    messageDiv.textContent = "";
+    hintVisible = false;
+    renderHint();
+    messageState = null;
+    renderMessage();
     nextBtn.style.display = "none";
     guessInput.value = "";
     guessInput.disabled = false;
     guessBtn.disabled = false;
     flagImg.style.display = "none";
     loader.style.display = "block";
-    loader.textContent = "Carregando bandeira...";
+    setText(loader, 'flag.loading');
 
     if (availableCountries.length === 0) {
         availableCountries = [...activeCountries];
@@ -223,12 +258,12 @@ function loadNewCountry() {
     flagImg.onerror = () => {
         // Falha de rede não é culpa do jogador: não zera a pontuação e oferece
         // sortear outra bandeira, em vez de deixar o jogo travado.
-        loader.textContent = "Erro ao carregar imagem.";
+        setText(loader, 'flag.imageError');
         isLost = false;
         roundEnded = true;
         guessInput.disabled = true;
         guessBtn.disabled = true;
-        nextBtn.textContent = "Tentar outra bandeira";
+        setText(nextBtn, 'flag.retry');
         nextBtn.style.display = "block";
     };
 }
@@ -236,9 +271,8 @@ function loadNewCountry() {
 function showHint() {
     playSound('click');
     hintUsed = true;
-    const contNames = { Americas: "Américas", Europe: "Europa", Asia: "Ásia", Africa: "África", Oceania: "Oceania" };
-    hintBox.innerHTML = `<strong>Dica:</strong> Capital: ${currentCountry.capital} | Continente: ${contNames[currentCountry.continent] || currentCountry.continent}`;
-    hintBox.classList.add('active');
+    hintVisible = true;
+    renderHint();
 }
 
 function startTimer() {
@@ -266,7 +300,8 @@ function updateTimerBar() {
 function timeOut() {
     playSound('error');
     isLost = true;
-    messageDiv.textContent = `Tempo esgotado! O país era: ${currentCountry.name}.`;
+    messageState = { key: 'flag.timeout', hintNote: false };
+    renderMessage();
     messageDiv.className = "message error";
     score = 0;
     scoreSpan.textContent = score;
@@ -281,14 +316,14 @@ function checkGuess() {
 
     clearInterval(timerInterval);
 
-    const cleanGuess = normalizeString(userGuess);
-    const correctMain = normalizeString(currentCountry.name);
-    const isMatch = cleanGuess === correctMain || currentCountry.aliases.some(alias => normalizeString(alias) === cleanGuess);
+    // Aceita o nome do país em qualquer idioma do site (ver js/country-names.js).
+    const isMatch = matchesCountry(userGuess, currentCountry);
 
     if (isMatch) {
         playSound('success');
         isLost = false;
-        messageDiv.textContent = `Correto! É ${currentCountry.name}.`;
+        messageState = { key: 'flag.correct', hintNote: hintUsed };
+        renderMessage();
         messageDiv.className = "message success";
         
         if (!hintUsed) {
@@ -299,13 +334,12 @@ function checkGuess() {
                 localStorage.setItem(STORAGE.records, JSON.stringify(records));
                 recordSpan.textContent = score;
             }
-        } else {
-            messageDiv.textContent += " (Dica usada: sem pontuação nesta rodada)";
         }
     } else {
         playSound('error');
         isLost = true;
-        messageDiv.textContent = `Incorreto. O país era: ${currentCountry.name}.`;
+        messageState = { key: 'flag.incorrect', hintNote: false };
+        renderMessage();
         messageDiv.className = "message error";
         score = 0;
         scoreSpan.textContent = score;
@@ -322,9 +356,9 @@ function endRound() {
     guessBtn.disabled = true;
     
     if (isLost) {
-        nextBtn.textContent = "Recomeçar";
+        setText(nextBtn, 'flag.restart');
     } else {
-        nextBtn.textContent = "Próxima Bandeira";
+        setText(nextBtn, 'flag.next');
     }
 
     nextBtn.style.display = "block";
@@ -369,4 +403,11 @@ document.getElementById('back-btn').addEventListener('click', returnToMenu);
 document.getElementById('settings-btn').addEventListener('click', toggleSettings);
 document.getElementById('font-size-select').addEventListener('change', (event) => changeFontSize(event.target.value));
 
+// Se a pessoa trocar o idioma no meio da rodada, o que foi montado em JS é refeito.
+onLangChange(() => {
+    renderMessage();
+    renderHint();
+});
+
+await initI18n();
 loadCountries();

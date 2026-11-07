@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flag — GGEO</title>
+    <title data-i18n="flag.title">Flag — GGEO</title>
+    <!-- Idioma escolhido antes de desenhar a página. Veja js/lang.js -->
+    <script src="../../js/lang.js"></script>
     <!-- Tema aplicado antes de desenhar a página (evita piscar). Veja js/theme.js -->
     <script src="../../js/theme.js"></script>
     <link rel="stylesheet" href="../../css/main.css">
@@ -14,18 +16,19 @@
     <div class="container">
         <!-- BOTÕES DO TOPO -->
         <div class="top-controls">
-            <button class="icon-btn" id="theme-toggle" data-theme-toggle title="Alternar Tema">🌙</button>
-            <button class="icon-btn" id="settings-btn" title="Configurações">⚙️</button>
+            <div class="lang-picker"><span aria-hidden="true">🌐</span><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
+            <button class="icon-btn" id="theme-toggle" data-theme-toggle>🌙</button>
+            <button class="icon-btn" id="settings-btn" data-i18n-attr="title:flag.settings; aria-label:flag.settings" title="Configurações" aria-label="Configurações">⚙️</button>
         </div>
 
         <!-- MODAL DE CONFIGURAÇÕES -->
         <div id="settings-modal" class="settings-modal">
-            <label for="font-size-select">Tamanho da Fonte:</label>
+            <label for="font-size-select" data-i18n="flag.fontSize">Tamanho da Fonte:</label>
             <select id="font-size-select">
-                <option value="small">Pequena</option>
-                <option value="medium" selected>Média</option>
-                <option value="large">Grande</option>
-                <option value="xlarge">Muito Grande</option>
+                <option value="small" data-i18n="flag.font.small">Pequena</option>
+                <option value="medium" data-i18n="flag.font.medium" selected>Média</option>
+                <option value="large" data-i18n="flag.font.large">Grande</option>
+                <option value="xlarge" data-i18n="flag.font.xlarge">Muito Grande</option>
             </select>
         </div>
 
@@ -33,31 +36,31 @@
         <div id="menu-screen">
             <a class="back-platform" href="../../index.html">← GGEO</a>
             <h1>Flag</h1>
-            <p class="subtitle">[ Jogo de Adivinhação de Bandeiras ]</p>
+            <p class="subtitle" data-i18n="flag.subtitle">[ Jogo de Adivinhação de Bandeiras ]</p>
 
             <div class="menu-section">
-                <label for="continent-select">Região:</label>
+                <label for="continent-select" data-i18n="flag.region">Região:</label>
                 <select id="continent-select">
-                    <option value="all">🌐 Mundo Todo</option>
-                    <option value="Americas">🌎 Américas</option>
-                    <option value="Europe">🇪🇺 Europa</option>
-                    <option value="Asia">🌏 Ásia</option>
-                    <option value="Africa">🌍 África</option>
-                    <option value="Oceania">🇦🇺 Oceania</option>
+                    <option value="all" data-i18n="flag.region.all">🌐 Mundo Todo</option>
+                    <option value="Americas" data-i18n="flag.region.Americas">🌎 Américas</option>
+                    <option value="Europe" data-i18n="flag.region.Europe">🇪🇺 Europa</option>
+                    <option value="Asia" data-i18n="flag.region.Asia">🌏 Ásia</option>
+                    <option value="Africa" data-i18n="flag.region.Africa">🌍 África</option>
+                    <option value="Oceania" data-i18n="flag.region.Oceania">🇦🇺 Oceania</option>
                 </select>
             </div>
 
             <div class="menu-section">
-                <label for="difficulty-select">Dificuldade (Tempo):</label>
+                <label for="difficulty-select" data-i18n="flag.difficulty">Dificuldade (Tempo):</label>
                 <select id="difficulty-select">
-                    <option value="30">Fácil (30 segundos)</option>
-                    <option value="15" selected>Médio (15 segundos)</option>
-                    <option value="8">Difícil (8 segundos)</option>
-                    <option value="0">Livre (Sem cronômetro)</option>
+                    <option value="30" data-i18n="flag.difficulty.30">Fácil (30 segundos)</option>
+                    <option value="15" data-i18n="flag.difficulty.15" selected>Médio (15 segundos)</option>
+                    <option value="8" data-i18n="flag.difficulty.8">Difícil (8 segundos)</option>
+                    <option value="0" data-i18n="flag.difficulty.0">Livre (Sem cronômetro)</option>
                 </select>
             </div>
 
-            <button class="btn-primary" id="start-btn">Iniciar Jogo</button>
+            <button class="btn-primary" id="start-btn" data-i18n="flag.start">Iniciar Jogo</button>
             <div id="menu-message" class="message"></div>
         </div>
 
@@ -65,8 +68,8 @@
         <div id="game-screen" class="hidden">
             <h1>Flag</h1>
             <div class="stats-container">
-                <div>Acertos: <span id="score">0</span></div>
-                <div>Recorde: <span id="record">0</span></div>
+                <div><span data-i18n="flag.score">Acertos:</span> <span id="score">0</span></div>
+                <div><span data-i18n="flag.record">Recorde:</span> <span id="record">0</span></div>
             </div>
 
             <div id="timer-container" class="timer-bar-container">
@@ -75,23 +78,23 @@
         
             <div class="flag-container">
                 <span id="loader" class="loader">Carregando bandeira...</span>
-                <img id="flag-img" src="" alt="Bandeira misteriosa" style="display: none;">
+                <img id="flag-img" src="" data-i18n-attr="alt:flag.flagAlt" alt="Bandeira misteriosa" style="display: none;">
             </div>
 
-            <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn">💡 Pedir Dica (-1 Rodada sem bônus)</button>
+            <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn" data-i18n="flag.hintButton">💡 Pedir Dica (-1 Rodada sem bônus)</button>
             <div id="hint-box" class="hint-box" aria-live="polite"></div>
 
             <div id="game-area">
                 <div class="input-group">
-                    <input type="text" id="guess-input" placeholder="Digite o nome do país..." autocomplete="off">
-                    <button class="btn-primary" id="guess-btn" style="width: auto; margin-top:0;">Enviar</button>
+                    <input type="text" id="guess-input" data-i18n-attr="placeholder:flag.placeholder; aria-label:flag.placeholder" placeholder="Digite o nome do país..." aria-label="Digite o nome do país..." autocomplete="off">
+                    <button class="btn-primary" id="guess-btn" style="width: auto; margin-top:0;" data-i18n="flag.send">Enviar</button>
                 </div>
             </div>
 
             <div id="message" class="message" role="status" aria-live="polite"></div>
-            <button class="btn-primary" id="next-btn">Próxima Bandeira</button>
+            <button class="btn-primary" id="next-btn" data-i18n="flag.next">Próxima Bandeira</button>
 
-            <button class="back-menu-btn" id="back-btn">← Voltar ao Menu</button>
+            <button class="back-menu-btn" id="back-btn" data-i18n="flag.backToMenu">← Voltar ao Menu</button>
         </div>
     </div>
 
