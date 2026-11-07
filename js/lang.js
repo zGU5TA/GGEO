@@ -25,8 +25,8 @@
     var LANGUAGES = [
         { code: 'pt', name: 'Português', tag: 'pt-BR' },
         { code: 'en', name: 'English',   tag: 'en' },
-        { code: 'es', name: 'Español',   tag: 'es' }
-        // Futuro: { code: 'zh', name: '中文', tag: 'zh-Hans' }
+        { code: 'es', name: 'Español',   tag: 'es' },
+        { code: 'zh', name: '中文',      tag: 'zh-Hans' }
     ];
 
     function isSupported(code) {

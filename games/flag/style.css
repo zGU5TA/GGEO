@@ -157,6 +157,7 @@ select:focus, input:focus {
 }
 
 .btn-primary {
+    white-space: nowrap; /* "提交" e outros textos curtos não quebram em duas linhas */
     width: 100%;
     padding: 0.85rem;
     border: 1px solid var(--border);
