@@ -3,13 +3,14 @@
  *
  * Para ADICIONAR um jogo novo:
  *   1. crie a pasta games/<id>/ com um index.html;
- *   2. acrescente um item na lista abaixo.
+ *   2. acrescente um item na lista abaixo;
+ *   3. acrescente games.<id>.name e games.<id>.description em cada i18n/*.json.
  * A home monta os cartões sozinha a partir desta lista.
  *
  * Campos:
  *   id          nome curto, igual ao da pasta em games/
- *   name        nome exibido (os nomes ainda são PROVISÓRIOS)
- *   description frase curta que aparece no cartão
+ *   (nome e descrição do cartão ficam em i18n/<idioma>.json, nas chaves
+ *    games.<id>.name e games.<id>.description; os nomes ainda são PROVISÓRIOS)
  *   path        caminho do jogo, relativo à raiz do site (sem "/" no começo)
  *   status      "available" (jogável) ou "soon" (em breve)
  *   icon        SVG simples; usa currentColor, então acompanha o tema
@@ -31,16 +32,12 @@ const ICON_ROUTE = `
 export const games = [
     {
         id: 'flag',
-        name: 'Flag',
-        description: 'Veja a bandeira e descubra de qual país ela é antes que o tempo acabe.',
         path: 'games/flag/index.html',
         status: 'available',
         icon: ICON_FLAG,
     },
     {
         id: 'rotas',
-        name: 'Rotas',
-        description: 'Descubra o caminho entre dois países, passando pelos vizinhos no mapa.',
         path: 'games/rotas/index.html',
         status: 'soon',
         icon: ICON_ROUTE,

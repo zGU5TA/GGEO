@@ -4,6 +4,8 @@
  * do nosso próprio games.js, entra como SVG.
  */
 
+import { t } from './i18n.js';
+
 function createElement(tag, className, text) {
     const element = document.createElement(tag);
     if (className) element.className = className;
@@ -22,24 +24,24 @@ function createCard(game) {
 
     const body = createElement('div', 'game-card__body');
     body.append(
-        createElement('h3', 'game-card__title', game.name),
-        createElement('p', 'game-card__text', game.description),
+        createElement('h3', 'game-card__title', t(`games.${game.id}.name`)),
+        createElement('p', 'game-card__text', t(`games.${game.id}.description`)),
     );
 
     const footer = createElement('div', 'game-card__footer');
     const badge = createElement(
         'span',
         `badge ${available ? 'badge--available' : 'badge--soon'}`,
-        available ? 'Disponível' : 'Em desenvolvimento',
+        available ? t('catalog.available') : t('catalog.inDev'),
     );
 
     let action;
     if (available) {
-        action = createElement('a', 'btn btn-primary', 'Jogar');
+        action = createElement('a', 'btn btn-primary', t('catalog.play'));
         action.href = game.path;
-        action.setAttribute('aria-label', `Jogar ${game.name}`);
+        action.setAttribute('aria-label', t('catalog.playAria', { name: t(`games.${game.id}.name`) }));
     } else {
-        action = createElement('span', 'btn', 'Em breve');
+        action = createElement('span', 'btn', t('catalog.soon'));
         action.setAttribute('aria-disabled', 'true');
     }
 
