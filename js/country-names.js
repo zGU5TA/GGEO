@@ -6,11 +6,13 @@
  *   qualquer idioma, inclusive mandarim. Se o navegador não souber, usa o português.
  * - Capital: `country.capitals[idioma]` quando existir; senão `country.capital`
  *   (português). Só são listadas em data/countries.json as que diferem do português.
- * - Resposta digitada: vale o nome em QUALQUER idioma suportado, mais os apelidos
- *   de `country.aliases`, ignorando acentos, maiúsculas e espaços repetidos.
- *   Assim quem joga em inglês pode digitar "Espanha" ou "España" e acertar.
+ * - Resposta digitada: vale SÓ o idioma em que a pessoa está jogando: o nome
+ *   do país nesse idioma mais os apelidos dele (`country.aliases` para o
+ *   português; `country.aliasesByLang.<idioma>` para os demais), ignorando
+ *   acentos, maiúsculas e espaços repetidos. Jogando em inglês, "Suíça" está
+ *   errado e "Switzerland" está certo.
  */
-import { LANGUAGES, DEFAULT_LANG, getLang, langTag } from './i18n.js';
+import { DEFAULT_LANG, getLang, langTag } from './i18n.js';
 
 const formatters = new Map();
 
@@ -58,21 +60,22 @@ function normalize(text) {
         .trim();
 }
 
-const acceptedCache = new WeakMap();
+const acceptedCache = new WeakMap(); // país -> { idioma -> Set de respostas aceitas }
 
-function acceptedAnswers(country) {
-    if (!acceptedCache.has(country)) {
-        const accepted = new Set([country.name, ...country.aliases].map(normalize));
-        for (const language of LANGUAGES) {
-            const name = intlName(country, language.code);
-            if (name) accepted.add(normalize(name));
-        }
-        acceptedCache.set(country, accepted);
+/** Todas as respostas aceitas para o país nesse idioma (já normalizadas). */
+export function acceptedAnswers(country, lang = getLang()) {
+    if (!acceptedCache.has(country)) acceptedCache.set(country, new Map());
+    const byLang = acceptedCache.get(country);
+    if (!byLang.has(lang)) {
+        const names = [countryName(country, lang)];
+        if (lang === DEFAULT_LANG) names.push(...country.aliases);
+        else names.push(...((country.aliasesByLang && country.aliasesByLang[lang]) || []));
+        byLang.set(lang, new Set(names.map(normalize)));
     }
-    return acceptedCache.get(country);
+    return byLang.get(lang);
 }
 
-/** A resposta digitada corresponde a esse país? */
-export function matchesCountry(guess, country) {
-    return acceptedAnswers(country).has(normalize(guess));
+/** A resposta digitada corresponde a esse país, no idioma atual? */
+export function matchesCountry(guess, country, lang = getLang()) {
+    return acceptedAnswers(country, lang).has(normalize(guess));
 }
