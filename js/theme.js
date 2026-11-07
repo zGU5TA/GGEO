@@ -8,7 +8,7 @@
  * Como usar numa página:
  *   <script src="js/theme.js"></script>              (no <head>)
  *   <button data-theme-toggle>...</button>           (qualquer botão)
- * O botão é ligado sozinho; o texto/ícone dele é atualizado aqui.
+ * O botão é ligado sozinho; o ícone dele é atualizado aqui (o rótulo falado, por js/i18n.js).
  */
 (function () {
     var KEY = 'ggeo_theme';
@@ -33,12 +33,11 @@
     }
 
     function updateButtons(theme) {
-        var next = theme === 'dark' ? 'claro' : 'escuro';
+        // Só o ícone: o rótulo falado ("Mudar para o tema claro...") depende do
+        // idioma e é colocado por js/i18n.js.
         var buttons = document.querySelectorAll('[data-theme-toggle]');
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].textContent = theme === 'dark' ? '🌙' : '☀️';
-            buttons[i].setAttribute('aria-label', 'Mudar para o tema ' + next);
-            buttons[i].setAttribute('title', 'Mudar para o tema ' + next);
         }
     }
 
@@ -47,6 +46,8 @@
         root.setAttribute('data-theme', theme);
         root.style.colorScheme = theme; // faz campos e barras de rolagem acompanharem o tema
         updateButtons(theme);
+        // Avisa quem precisar reagir ao tema (js/i18n.js atualiza o rótulo do botão).
+        document.dispatchEvent(new CustomEvent('ggeo:themechange', { detail: theme }));
     }
 
     function current() {

@@ -79,6 +79,46 @@ body {
     display: none !important;
 }
 
+/* Quem usa outro idioma que não o português fica sem ver a página por um
+   instante, até js/i18n.js trocar os textos (veja js/lang.js). */
+html.i18n-loading body {
+    visibility: hidden;
+}
+
+/* ---------- Seletor de idioma ---------- */
+/* Mostra o nome de cada idioma no próprio idioma (Português, English, Español). */
+
+.lang-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2.5rem;
+    padding-inline: 0.6rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--fg);
+}
+
+.lang-picker:hover,
+.lang-picker:focus-within {
+    border-color: var(--accent);
+}
+
+.lang-picker select {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.lang-picker select option {
+    background-color: var(--bg);
+    color: var(--fg);
+}
+
 .visually-hidden {
     position: absolute;
     width: 1px;
