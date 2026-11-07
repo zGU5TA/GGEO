@@ -65,8 +65,12 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   e redesenhado ao trocar o idioma, até no meio de uma rodada.
 - Nomes de países usam `Intl.DisplayNames` do navegador (cobre pt, en, es e zh
   sem tradução manual). Capitais usam `capitals` no `countries.json`.
-- A resposta é aceita em qualquer idioma do site, ignorando acentos e
-  maiúsculas. Verifiquei que nenhuma grafia aceita aponta para dois países.
+- A resposta vale **só no idioma em que se joga** (nome do país nesse idioma +
+  apelidos em `aliases`/`aliasesByLang`), ignorando acentos e maiúsculas. Em
+  inglês, "Suíça" está errado. Para todos os 128 países e 4 idiomas, o nome
+  exibido é aceito, nomes de outros idiomas são rejeitados e nenhuma resposta
+  aponta para dois países.
+- Mandarim: só escrita simplificada; pinyin e caracteres tradicionais não são aceitos.
 - O nome "Flag" e o slogan "Play the World" não são traduzidos de propósito.
 - Fica em aberto: o `<noscript>` continua só em português.
 

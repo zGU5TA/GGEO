@@ -92,7 +92,7 @@ site é publicado numa subpasta (como no GitHub Pages).
 
 O site tem um seletor de idioma (🌐) ao lado do botão de tema, na home, e no
 topo do jogo Flag, junto do botão de configurações. Cada idioma aparece com o
-próprio nome: **Português**, **English**, **Español**.
+próprio nome: **Português**, **English**, **Español**, **中文** (mandarim simplificado).
 
 - **Primeira visita:** o site usa o idioma do navegador, se for um dos
   suportados, e senão o português. Para desligar isso e começar sempre em
@@ -104,29 +104,32 @@ próprio nome: **Português**, **English**, **Español**.
   `data-i18n="chave"` (ou `data-i18n-attr="placeholder:chave"`) são traduzidos.
   No JavaScript use `t('chave', { parametro })` de `js/i18n.js`.
 - **Países:** o nome vem do próprio navegador (`Intl.DisplayNames`), sem lista
-  manual. Capitais em inglês e espanhol estão em `capitals` no
-  `countries.json` (só onde diferem do português). O jogo aceita a resposta em
-  qualquer idioma do site.
-- Esses textos em inglês e espanhol foram escritos por mim (IA) e **vale
-  uma revisão de falantes nativos**, principalmente as capitais.
+  manual. As capitais ficam em `capitals` no `countries.json` (em português,
+  inglês, espanhol e chinês).
+- **Resposta no jogo:** vale só o idioma em que se está jogando. Em inglês,
+  "Suíça" está errado e "Switzerland" está certo; em chinês, vale "瑞士".
+  Apelidos aceitos ("USA", "UK", "EE.UU.", "阿联酋"...) ficam em `aliases`
+  (português) e `aliasesByLang` (`en`, `es`, `zh`).
+- Os textos em inglês, espanhol e chinês foram escritos por mim (IA) e **vale
+  uma revisão de falantes nativos**, principalmente as capitais. No chinês,
+  só vale a escrita simplificada (繁體 e pinyin não são aceitos).
 
-**Adicionar um idioma (ex.: mandarim):**
+**Adicionar um idioma (o mandarim foi feito assim):**
 
-1. Copie `i18n/en.json` para `i18n/zh.json` e traduza os valores (não as chaves).
+1. Copie `i18n/en.json` para `i18n/<codigo>.json` e traduza os valores (não as chaves).
 2. Em `js/lang.js`, acrescente na lista `{ code: 'zh', name: '中文', tag: 'zh-Hans' }`.
-3. Opcional: acrescente `"zh"` em `capitals` nos países, para a dica mostrar a
-   capital em chinês (sem isso, a dica mostra a capital em português).
-
-Testei esse caminho numa cópia: o seletor ganhou "中文", os textos trocaram e
-os nomes de países em chinês funcionaram. Falta só a tradução real. Para
-chinês, ainda vale conferir fontes e a largura dos textos no celular.
+3. Em `data/countries.json`, acrescente o idioma em `capitals` de cada país (sem
+   isso a dica mostra a capital em português) e, se quiser, apelidos em
+   `aliasesByLang`.
 
 ### Corrigir ou acrescentar países
 
 Edite `data/countries.json` (um país por linha). Campos: `name`, `code`
 (ISO 3166-1 alfa-2 minúsculo, usado para buscar a bandeira), `continent`,
-`capital`, `capitals` (opcional: capital em `en` e `es`) e `aliases` (outras
-grafias aceitas, sem acento e em minúsculas).
+`capital` (português), `capitals` (capital em `en`, `es`, `zh`; só onde difere do
+português, exceto `zh`, que tem todas), `aliases` (outras grafias aceitas em
+português, sem acento e em minúsculas) e `aliasesByLang` (o mesmo para `en`,
+`es`, `zh`).
 
 ## Publicação
 
@@ -156,7 +159,7 @@ precisa de internet para mostrá-las.
 Ainda não há testes automatizados no repositório. Na construção da base, estes
 pontos foram verificados à mão no **Google Chrome** (celular e desktop, tema
 claro e escuro, e publicação em subpasta): abertura das páginas, navegação
-home ↔ jogo, tema e sua persistência, troca de idioma (pt/en/es) e sua
+home ↔ jogo, tema e sua persistência, troca de idioma (pt/en/es/zh), aceitação de nomes de países só no idioma atual e sua
 persistência, cronômetro, validação de respostas,
 dicas, pontuação, recordes, migração dos dados do antigo Flagle, falha ao
 carregar bandeira e console sem erros.
