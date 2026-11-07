@@ -21,7 +21,8 @@ site fica numa subpasta (GitHub Pages de projeto).
 | Pasta | Conteúdo | Quem usa |
 |-------|----------|----------|
 | `css/` | paleta e componentes da plataforma | todas as páginas |
-| `js/` | tema, catálogo e ponto de entrada da home | home (`theme.js` também nos jogos) |
+| `js/` | tema, idioma, catálogo e ponto de entrada da home | home (`theme.js`, `lang.js` e `i18n.js` também nos jogos) |
+| `i18n/` | textos de cada idioma (`pt.json`, `en.json`, `es.json`) | todas as páginas |
 | `data/` | dados compartilhados entre jogos | jogos |
 | `games/<id>/` | um jogo completo e independente | só o próprio jogo |
 | `docs/` | documentação | pessoas |
@@ -50,6 +51,25 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   tema ser aplicado antes da página aparecer e não "piscar". A escolha fica em
   `localStorage` (`ggeo_theme`).
 
+### Idiomas (i18n)
+
+- Dicionários simples em `i18n/<codigo>.json` (chave → texto, com `{parametros}`).
+  Sem biblioteca: são ~70 textos, e assim dá para entender e editar tudo.
+- O HTML guarda o texto em **português**, que aparece sem JavaScript e no
+  primeiro desenho. `js/lang.js` (script comum na `<head>`) decide o idioma
+  cedo; se não for português, a página fica escondida por instantes
+  (`i18n-loading`, com limite de 3 s) até os textos chegarem, para não piscar
+  em português.
+- O idioma vem de: escolha salva (`ggeo_lang`) → idioma do navegador → português.
+- O que o JS monta (cartões, mensagens do jogo, dica) é guardado como **dados**
+  e redesenhado ao trocar o idioma, até no meio de uma rodada.
+- Nomes de países usam `Intl.DisplayNames` do navegador (cobre pt, en, es e zh
+  sem tradução manual). Capitais usam `capitals` no `countries.json`.
+- A resposta é aceita em qualquer idioma do site, ignorando acentos e
+  maiúsculas. Verifiquei que nenhuma grafia aceita aponta para dois países.
+- O nome "Flag" e o slogan "Play the World" não são traduzidos de propósito.
+- Fica em aberto: o `<noscript>` continua só em português.
+
 ### Países em `data/countries.json`
 
 A lista saiu do código do jogo para um arquivo de dados, porque o futuro jogo
@@ -73,6 +93,7 @@ dela, então adicionar um jogo não exige mexer em `index.html`.
 | Chave | Conteúdo | Observação |
 |-------|----------|------------|
 | `ggeo_theme` | `dark` ou `light` | compartilhada por todas as páginas |
+| `ggeo_lang` | `pt`, `en` ou `es` | só é gravada quando a pessoa escolhe no seletor |
 | `ggeo_flag_records` | recorde por região do jogo Flag | |
 | `ggeo_flag_font` | tamanho da fonte do jogo Flag | |
 

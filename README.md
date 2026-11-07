@@ -39,9 +39,16 @@ GGEO/
 │   └── components.css      cabeçalho, botões e cartões da plataforma
 ├── js/
 │   ├── theme.js            tema claro/escuro (todas as páginas)
+│   ├── lang.js             escolhe o idioma antes da página aparecer
+│   ├── i18n.js             carrega os textos e troca o idioma
+│   ├── country-names.js    nomes de países/capitais por idioma e validação das respostas
 │   ├── games.js            LISTA dos jogos do catálogo
 │   ├── catalog.js          desenha os cartões a partir da lista
 │   └── main.js             ponto de entrada da página inicial
+├── i18n/
+│   ├── pt.json             textos em português (referência)
+│   ├── en.json             textos em inglês
+│   └── es.json             textos em espanhol
 ├── data/
 │   └── countries.json      países (compartilhado entre os jogos)
 ├── games/
@@ -68,22 +75,58 @@ O tema escuro está em `:root`; o claro sobrescreve só o que difere em
 ### Adicionar um jogo
 
 1. Crie `games/<id>/index.html` (copie a estrutura de `games/flag/`).
-2. Na `<head>`, importe o que é compartilhado:
+2. Na `<head>`, importe o que é compartilhado (o `lang.js` vem antes do `theme.js`):
    ```html
+   <script src="../../js/lang.js"></script>
    <script src="../../js/theme.js"></script>
    <link rel="stylesheet" href="../../css/main.css">
    ```
 3. Acrescente um item em `js/games.js` com `status: 'available'`.
+4. Acrescente `games.<id>.name` e `games.<id>.description` em cada arquivo de `i18n/`.
 
 A home mostra o novo cartão sozinha. Use `../../` para chegar à raiz a partir
 de `games/<id>/` e **nunca** caminhos que começam com `/`: eles quebram quando o
 site é publicado numa subpasta (como no GitHub Pages).
 
+### Idiomas
+
+O site tem um seletor de idioma (🌐) ao lado do botão de tema, na home, e no
+topo do jogo Flag, junto do botão de configurações. Cada idioma aparece com o
+próprio nome: **Português**, **English**, **Español**.
+
+- **Primeira visita:** o site usa o idioma do navegador, se for um dos
+  suportados, e senão o português. Para desligar isso e começar sempre em
+  português, mude a função de escolha em `js/lang.js`.
+- **Escolha salva** em `localStorage` (`ggeo_lang`) e vale para todas as páginas.
+- Textos ficam em `i18n/<codigo>.json`; o português é a referência e serve de
+  reserva se faltar uma chave em outro idioma.
+- Nos HTMLs, o texto escrito é o português padrão; elementos com
+  `data-i18n="chave"` (ou `data-i18n-attr="placeholder:chave"`) são traduzidos.
+  No JavaScript use `t('chave', { parametro })` de `js/i18n.js`.
+- **Países:** o nome vem do próprio navegador (`Intl.DisplayNames`), sem lista
+  manual. Capitais em inglês e espanhol estão em `capitals` no
+  `countries.json` (só onde diferem do português). O jogo aceita a resposta em
+  qualquer idioma do site.
+- Esses textos em inglês e espanhol foram escritos por mim (IA) e **vale
+  uma revisão de falantes nativos**, principalmente as capitais.
+
+**Adicionar um idioma (ex.: mandarim):**
+
+1. Copie `i18n/en.json` para `i18n/zh.json` e traduza os valores (não as chaves).
+2. Em `js/lang.js`, acrescente na lista `{ code: 'zh', name: '中文', tag: 'zh-Hans' }`.
+3. Opcional: acrescente `"zh"` em `capitals` nos países, para a dica mostrar a
+   capital em chinês (sem isso, a dica mostra a capital em português).
+
+Testei esse caminho numa cópia: o seletor ganhou "中文", os textos trocaram e
+os nomes de países em chinês funcionaram. Falta só a tradução real. Para
+chinês, ainda vale conferir fontes e a largura dos textos no celular.
+
 ### Corrigir ou acrescentar países
 
 Edite `data/countries.json` (um país por linha). Campos: `name`, `code`
 (ISO 3166-1 alfa-2 minúsculo, usado para buscar a bandeira), `continent`,
-`capital` e `aliases` (outras grafias aceitas, sem acento e em minúsculas).
+`capital`, `capitals` (opcional: capital em `en` e `es`) e `aliases` (outras
+grafias aceitas, sem acento e em minúsculas).
 
 ## Publicação
 
@@ -113,7 +156,8 @@ precisa de internet para mostrá-las.
 Ainda não há testes automatizados no repositório. Na construção da base, estes
 pontos foram verificados à mão no **Google Chrome** (celular e desktop, tema
 claro e escuro, e publicação em subpasta): abertura das páginas, navegação
-home ↔ jogo, tema e sua persistência, cronômetro, validação de respostas,
+home ↔ jogo, tema e sua persistência, troca de idioma (pt/en/es) e sua
+persistência, cronômetro, validação de respostas,
 dicas, pontuação, recordes, migração dos dados do antigo Flagle, falha ao
 carregar bandeira e console sem erros.
 
