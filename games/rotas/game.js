@@ -267,7 +267,8 @@ function setupPointerGestures(element) {
             }
         } else if (pointers.size === 1 && gestureMoved) {
             // dx/dy estão em pixels da tela; o desenho usa MAP_SIZE unidades
-            const unit = MAP_SIZE / element.getBoundingClientRect().width;
+            const rect = element.getBoundingClientRect();
+            const unit = MAP_SIZE / Math.min(rect.width, rect.height);   // o globo cabe no menor lado
             const [lambda, phi] = projection.rotate();
             const k = 75 / projection.scale();
             projection.rotate([lambda + dx * unit * k, Math.max(-90, Math.min(90, phi - dy * unit * k))]);
@@ -619,6 +620,7 @@ function showPanels() {
         panel.classList.toggle('hidden', !!ended);
     }
     resultEl.classList.toggle('hidden', !ended);
+    document.querySelector('.rotas-layout').classList.toggle('is-ended', !!ended);
 }
 
 // ================= Dicas =================

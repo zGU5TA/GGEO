@@ -60,6 +60,21 @@ body {
             "hints   globe";
         column-gap: 1.75rem;
     }
+
+    /* Fim da rodada: painel de resultado e mapa têm exatamente a mesma altura. */
+    .rotas-layout.is-ended {
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "route  route"
+            "result globe";
+    }
+    .rotas-layout.is-ended .result { align-self: stretch; }
+    .rotas-layout.is-ended .globe-wrap {
+        align-self: stretch;
+        aspect-ratio: auto;
+        max-width: none;
+        margin-inline: 0;
+    }
 }
 
 /* ---------- Origem → destino ---------- */
