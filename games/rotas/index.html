@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="rotas.pageTitle">Rotas — GGEO</title>
+    <!-- Idioma, fonte e tema são aplicados antes de desenhar a página. Veja js/lang.js, js/font.js e js/theme.js -->
+    <script src="../../js/lang.js"></script>
+    <script src="../../js/font.js"></script>
+    <script src="../../js/theme.js"></script>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/game-shell.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- d3 (globo 3D), guardado no próprio repositório: js/vendor/. Roda antes de game.js. -->
+    <script defer src="../../js/vendor/d3.min.js"></script>
+    <script type="module" src="game.js"></script>
+</head>
+<body>
+
+    <main class="container rotas">
+        <!-- BOTÕES DO TOPO -->
+        <div class="top-controls">
+            <div class="lang-picker"><span aria-hidden="true">🌐</span><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
+            <button class="icon-btn" id="theme-toggle" data-theme-toggle>🌙</button>
+            <button class="icon-btn" id="settings-btn" aria-expanded="false" aria-controls="settings-modal" data-i18n-attr="title:settings.title; aria-label:settings.title" title="Configurações" aria-label="Configurações">⚙️</button>
+        </div>
+
+        <!-- CONFIGURAÇÕES -->
+        <div id="settings-modal" class="settings-modal">
+            <label for="font-size-select" data-i18n="settings.fontSize">Tamanho da Fonte:</label>
+            <select id="font-size-select" data-font-select>
+                <option value="small" data-i18n="settings.font.small">Pequena</option>
+                <option value="medium" data-i18n="settings.font.medium" selected>Média</option>
+                <option value="large" data-i18n="settings.font.large">Grande</option>
+                <option value="xlarge" data-i18n="settings.font.xlarge">Muito Grande</option>
+            </select>
+        </div>
+
+        <header class="rotas-header">
+            <a class="back-platform" href="../../index.html">← GGEO</a>
+            <h1 data-i18n="rotas.title">Rotas</h1>
+            <p class="subtitle" data-i18n="rotas.subtitle">[ Jogo de Rotas entre Países ]</p>
+        </header>
+
+        <div class="rotas-layout">
+            <!-- Origem e destino -->
+            <p id="route" class="route" aria-live="polite" data-i18n="rotas.loading">Carregando mapa e fronteiras...</p>
+
+            <!-- Campo de palpite com sugestões -->
+            <div class="guess-area">
+                <div class="combo">
+                    <input type="text" id="country-input" autocomplete="off" autocapitalize="off" spellcheck="false" disabled
+                        role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions"
+                        data-i18n-attr="placeholder:rotas.placeholder; aria-label:rotas.placeholder"
+                        placeholder="Insira um país..." aria-label="Insira um país...">
+                    <ul id="suggestions" class="suggestions hidden" role="listbox"></ul>
+                </div>
+                <button class="btn-primary" id="guess-btn" disabled>…</button>
+                <p id="status" class="status" role="status"></p>
+            </div>
+
+            <!-- Palpites anteriores -->
+            <section class="guesses" aria-labelledby="guesses-title">
+                <h2 id="guesses-title" class="section-title" data-i18n="rotas.guessesTitle">Palpites anteriores:</h2>
+                <ul id="legend" class="legend" aria-hidden="true"></ul>
+                <ol id="guesses-list" class="guesses-list"></ol>
+            </section>
+
+            <!-- Dicas em sequência: cada uma libera a próxima -->
+            <section class="hints" aria-labelledby="hints-title">
+                <h2 id="hints-title" class="section-title">…</h2>
+                <button class="hint-btn" id="hint-1-btn" data-i18n="rotas.hint1">+ Mostrar países vizinhos</button>
+                <button class="hint-btn" id="hint-2-btn" data-i18n="rotas.hint2" disabled>+ Mostrar todos os contornos</button>
+                <button class="hint-btn" id="hint-3-btn" data-i18n="rotas.hint3" disabled>+ Mostrar iniciais</button>
+                <p id="hint-3-note" class="hint-note hidden" data-i18n="rotas.hint3Note">Toque ou passe o mouse sobre um país para ver a inicial.</p>
+            </section>
+
+            <!-- Globo -->
+            <div class="globe-wrap">
+                <div id="map" class="map" role="img" data-i18n-attr="aria-label:rotas.mapLabel" aria-label="Globo. Arraste para girar."></div>
+                <div id="tooltip" class="tooltip hidden" role="presentation"></div>
+                <div class="map-controls">
+                    <button id="zoom-in-btn" data-i18n-attr="aria-label:rotas.zoomIn; title:rotas.zoomIn" aria-label="Aproximar" title="Aproximar">+</button>
+                    <button id="zoom-out-btn" data-i18n-attr="aria-label:rotas.zoomOut; title:rotas.zoomOut" aria-label="Afastar" title="Afastar">−</button>
+                    <button id="center-map-btn" data-i18n-attr="aria-label:rotas.center; title:rotas.center" aria-label="Centralizar o mapa" title="Centralizar o mapa">⟲</button>
+                </div>
+            </div>
+        </div>
+
+        <noscript><p>JavaScript is required / Requer JavaScript.</p></noscript>
+    </main>
+
+    <!-- Fim da rodada (vitória ou derrota) -->
+    <div id="end-modal" class="end-modal hidden" role="dialog" aria-modal="true" aria-labelledby="end-title">
+        <div class="end-card">
+            <h2 id="end-title">…</h2>
+            <p id="end-text" class="end-text hidden"></p>
+            <dl id="end-stats" class="end-stats"></dl>
+            <p class="ideal-label" data-i18n="rotas.idealRoute">Uma das menores rotas:</p>
+            <p id="ideal-route" class="ideal-route"></p>
+            <button class="btn-primary" id="play-again-btn" data-i18n="rotas.playAgain">Jogar novamente</button>
+        </div>
+    </div>
+
+</body>
+</html>

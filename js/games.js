@@ -39,7 +39,7 @@ export const games = [
     {
         id: 'rotas',
         path: 'games/rotas/index.html',
-        status: 'soon',
+        status: 'available',
         icon: ICON_ROUTE,
     },
 ];

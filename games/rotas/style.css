@@ -1,0 +1,334 @@
+/* Rotas — o que é só deste jogo. O resto vem de css/game-shell.css. */
+
+body {
+    align-items: flex-start;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+/* Cores do jogo (derivadas da paleta GGEO; no tema claro ficam mais escuras
+   para manter o contraste sobre o bege). */
+:root {
+    --rt-start: var(--accent);
+    --rt-end: var(--fg);
+    --rt-good: #43a85c;
+    --rt-detour: #e0b400;
+    --rt-off: #7a7a7a;
+    --rt-on-chip: #000;
+}
+:root[data-theme="light"] {
+    --rt-start: #a85a00;
+    --rt-good: #2e7d32;
+    --rt-detour: #8a6a00;
+    --rt-off: #6b6b6b;
+    --rt-on-chip: #fff;
+}
+
+.container.rotas {
+    max-width: 980px;
+    text-align: left;
+}
+
+.rotas-header {
+    text-align: center;
+}
+
+/* ---------- Layout: uma coluna no celular, duas no computador ---------- */
+
+.rotas-layout {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "route" "guess" "globe" "guesses" "hints";
+}
+
+.route    { grid-area: route; }
+.guess-area { grid-area: guess; }
+.globe-wrap { grid-area: globe; }
+.guesses  { grid-area: guesses; }
+.hints    { grid-area: hints; }
+
+@media (min-width: 820px) {
+    .rotas-layout {
+        grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "route   route"
+            "guess   globe"
+            "guesses globe"
+            "hints   globe";
+        column-gap: 1.75rem;
+    }
+}
+
+/* ---------- Origem → destino ---------- */
+
+.route {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font-weight: bold;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.route .dot {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    margin-inline: 0.35em 0.25em;
+    border: 1px solid var(--border);
+    vertical-align: baseline;
+}
+.route .dot.start { background: var(--rt-start); }
+.route .dot.end   { background: var(--rt-end); }
+.route .arrow { margin-inline: 0.5em; color: var(--muted); }
+
+/* ---------- Campo de palpite ---------- */
+
+.combo { position: relative; }
+
+.guess-area .btn-primary { margin-top: 0.5rem; }
+.guess-area .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.suggestions {
+    position: absolute;
+    z-index: 20;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 11rem;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--fg);
+    border-top: 0;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.suggestions li {
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+}
+.suggestions li:last-child { border-bottom: 0; }
+.suggestions li:hover,
+.suggestions li[aria-selected="true"] {
+    background: var(--surface-2);
+}
+.suggestions li[aria-selected="true"] { outline: 2px solid var(--fg); outline-offset: -2px; }
+.suggestions mark { background: none; color: var(--accent); font-weight: bold; }
+:root[data-theme="light"] .suggestions mark { color: var(--fg); text-decoration: underline; }
+
+.status {
+    margin: 0.5rem 0 0;
+    min-height: 1.4em;
+    font-size: 0.85em;
+    color: var(--muted);
+}
+
+/* ---------- Palpites ---------- */
+
+.section-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.8em;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+.guesses {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    min-height: 7rem;
+    overflow: auto;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.9rem;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75em;
+    color: var(--muted);
+}
+
+.guesses-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 12rem;
+    overflow-y: auto;
+}
+
+.guesses-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 0.85em;
+}
+.guesses-list .num { color: var(--muted); }
+.guesses-list .empty { color: var(--muted); font-style: italic; border: 0; background: none; padding: 0; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4em;
+    height: 1.4em;
+    padding: 0 0.2em;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--rt-on-chip);
+    border: 1px solid var(--bg);
+}
+.chip.green  { background: var(--rt-good); }
+.chip.yellow { background: var(--rt-detour); }
+.chip.gray   { background: var(--rt-off); }
+
+/* ---------- Dicas ---------- */
+
+.hints { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.hint-btn {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    font: inherit;
+    font-size: 0.85em;
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+.hint-btn:hover:not(:disabled) { border-color: var(--fg); }
+.hint-btn:disabled { opacity: 0.45; cursor: default; }
+.hint-btn.used { opacity: 0.6; }
+.hint-note { margin: 0; font-size: 0.8em; color: var(--muted); }
+
+/* ---------- Globo ---------- */
+
+.globe-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 540px;
+    aspect-ratio: 1;
+    margin-inline: auto;
+    align-self: start;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.map { width: 100%; height: 100%; cursor: grab; }
+.map:active { cursor: grabbing; }
+.map svg { display: block; touch-action: none; user-select: none; }
+
+.sphere { fill: color-mix(in srgb, var(--fg) 4%, var(--bg)); stroke: var(--border); stroke-width: 1px; }
+.graticule { fill: none; stroke: var(--border); stroke-width: 0.5px; opacity: 0.6; }
+
+.country { fill: transparent; stroke: transparent; stroke-width: 0.5px; }
+.country.is-shown { fill: color-mix(in srgb, var(--fg) 7%, transparent); stroke: var(--border); }
+.country.is-near  { fill: color-mix(in srgb, var(--fg) 20%, transparent); stroke: var(--border); }
+.country.is-start { fill: var(--rt-start); stroke: var(--bg); }
+.country.is-end   { fill: var(--rt-end);   stroke: var(--bg); }
+.country.g-green  { fill: var(--rt-good);   stroke: var(--bg); }
+.country.g-yellow { fill: var(--rt-detour); stroke: var(--bg); }
+.country.g-gray   { fill: var(--rt-off);    stroke: var(--bg); }
+.country.is-reveal { fill: color-mix(in srgb, var(--fg) 45%, transparent); stroke: var(--bg); }
+
+.tooltip {
+    position: absolute;
+    z-index: 5;
+    padding: 0.2rem 0.5rem;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--fg);
+    font-size: 0.8em;
+    font-weight: bold;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.map-controls {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    z-index: 4;
+}
+.map-controls button {
+    width: 2.25rem;
+    height: 2.25rem;
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--fg);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+.map-controls button + button { border-top: 1px solid var(--border); }
+.map-controls button:hover { background: var(--surface-2); }
+
+/* ---------- Fim da rodada ---------- */
+
+.end-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.8);
+}
+.end-modal.hidden { display: none; }
+
+.end-card {
+    width: 100%;
+    max-width: 24rem;
+    padding: 1.5rem;
+    background: var(--bg);
+    color: var(--fg);
+    border: 2px solid var(--border);
+    text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.end-card h2 { margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.end-text { margin: 0 0 1rem; }
+.end-stats {
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+.end-stats div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.2rem 0; }
+.end-stats dt { color: var(--muted); font-size: 0.85em; text-align: left; }
+.end-stats dd { margin: 0; font-weight: bold; text-align: right; }
+.ideal-label { margin: 0 0 0.25rem; font-size: 0.8em; color: var(--muted); }
+.ideal-route { margin: 0 0 1rem; font-weight: bold; overflow-wrap: anywhere; }
+
+@media (max-width: 480px) {
+    .container.rotas { padding: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}
