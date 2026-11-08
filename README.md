@@ -34,6 +34,8 @@ VS Code (botão direito em `index.html` → *Open with Live Server*).
 ```text
 GGEO/
 ├── index.html              página inicial (catálogo de jogos)
+├── assets/                 favicon, logotipo do globo e imagem de prévia (Open Graph)
+├── tools/make-logo.js      gera os SVGs do globo (node tools/make-logo.js)
 ├── css/
 │   ├── main.css            paleta, tema claro/escuro e base (todas as páginas)
 │   ├── components.css      cabeçalho, botões e cartões da plataforma
