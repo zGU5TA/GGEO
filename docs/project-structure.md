@@ -20,9 +20,9 @@ site fica numa subpasta (GitHub Pages de projeto).
 
 | Pasta | Conteúdo | Quem usa |
 |-------|----------|----------|
-| `css/` | paleta e componentes da plataforma | todas as páginas |
-| `js/` | tema, idioma, catálogo e ponto de entrada da home | home (`theme.js`, `lang.js` e `i18n.js` também nos jogos) |
-| `i18n/` | textos de cada idioma (`pt.json`, `en.json`, `es.json`) | todas as páginas |
+| `css/` | paleta, componentes da plataforma e `game-shell.css` (esqueleto comum dos jogos) | todas as páginas / jogos |
+| `js/` | tema, idioma, fonte, catálogo e ponto de entrada da home | home (`theme.js`, `lang.js`, `font.js` e `i18n.js` também nos jogos) |
+| `i18n/` | textos de cada idioma (`pt.json`, `en.json`, `es.json`, `zh.json`) | todas as páginas |
 | `data/` | dados compartilhados entre jogos | jogos |
 | `games/<id>/` | um jogo completo e independente | só o próprio jogo |
 | `docs/` | documentação | pessoas |
@@ -74,10 +74,48 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
 - O nome "Flag" e o slogan "Play the World" não são traduzidos de propósito.
 - Fica em aberto: o `<noscript>` continua só em português.
 
+### Estrutura e fonte compartilhadas pelos jogos
+
+- `css/game-shell.css` guarda o que todo jogo tem igual: cartão central, botões
+  do topo, janela de configurações, campos e botão principal. Cada jogo só
+  escreve no `style.css` o que é dele.
+- `js/font.js` (script comum na `<head>`) aplica o tamanho da fonte
+  (`<html data-font>`) antes de a página aparecer e liga qualquer
+  `<select data-font-select>`. A preferência vale para todos os jogos
+  (`ggeo_font`); a antiga do Flag (`ggeo_flag_font`) é copiada uma vez.
+
+### Rotas
+
+- **Dados dentro do repositório.** O protótipo original buscava fronteiras e
+  mapa em sites externos a cada partida e carregava o Tailwind e o d3 por CDN.
+  Aqui tudo é local (`data/world-borders.json`, `data/world-map.json`,
+  `js/vendor/d3.min.js`): o jogo não quebra se um desses sites cair, nem
+  depende de terceiros para carregar.
+- **Países:** os 193 membros da ONU. Fronteiras terrestres vêm do projeto
+  *mledoze/countries* (ODbL); contornos, do *Natural Earth* (domínio público),
+  simplificados para ~450 KB. Kosovo, Palestina, Taiwan, Saara Ocidental e
+  territórios não são sorteados nem aparecem no globo. O Vaticano ficou de
+  fora. A "fronteira" Índia–Sri Lanka foi removida (é marítima).
+- **Regras:** origem e destino ficam a 4 a 7 fronteiras de distância; o limite
+  de palpites é o mínimo necessário + 10. Verde = numa das menores rotas,
+  amarelo = conectado, mas em desvio, cinza = ainda sem ligação com a origem.
+  Ilhas sem fronteira (Japão, Austrália...) podem ser chutadas, mas nunca
+  entram na rota.
+- **Nomes e respostas** usam as mesmas regras do Flag (só o idioma atual vale;
+  `country-names.js`). Países fora do `countries.json` usam o nome do navegador
+  e não têm apelidos.
+- **Mudanças em relação ao protótipo:** quadro de derrota (antes o jogo
+  simplesmente travava), rota ideal mostrada no fim, mensagens para palpite
+  repetido/desconhecido, dica 3 também por toque (antes só passando o mouse),
+  símbolos ✓ ~ ✕ além das cores, autocompletar acessível por teclado, globo
+  centralizado entre origem e destino, cores que seguem o tema claro/escuro.
+- **Fica em aberto:** sem efeitos sonoros (o Flag tem), sem recorde/estatísticas,
+  sem zoom por gesto de pinça (há botões + e −), sem rota diária.
+
 ### Países em `data/countries.json`
 
-A lista saiu do código do jogo para um arquivo de dados, porque o futuro jogo
-Rotas vai precisar dos mesmos países. O jogo carrega o arquivo com `fetch`,
+A lista saiu do código do jogo para um arquivo de dados, porque o Rotas também
+usa os mesmos nomes. O jogo carrega o arquivo com `fetch`,
 usando `import.meta.url` para achar o caminho a partir do próprio `game.js`.
 O custo: o jogo não abre mais com duplo clique, só por servidor (ver README).
 
@@ -97,9 +135,10 @@ dela, então adicionar um jogo não exige mexer em `index.html`.
 | Chave | Conteúdo | Observação |
 |-------|----------|------------|
 | `ggeo_theme` | `dark` ou `light` | compartilhada por todas as páginas |
-| `ggeo_lang` | `pt`, `en` ou `es` | só é gravada quando a pessoa escolhe no seletor |
+| `ggeo_lang` | `pt`, `en`, `es` ou `zh` | só é gravada quando a pessoa escolhe no seletor |
+| `ggeo_font` | `small`, `medium`, `large` ou `xlarge` | tamanho da fonte, único para todos os jogos |
 | `ggeo_flag_records` | recorde por região do jogo Flag | |
-| `ggeo_flag_font` | tamanho da fonte do jogo Flag | |
+| `ggeo_flag_font` | (antiga) fonte do Flag | só lida uma vez: o valor é copiado para `ggeo_font` |
 
 Quando o jogo se chamava Flagle, as chaves eram `flagle_theme`,
 `flagle_records` e `flagle_font`. Na primeira visita os valores antigos são

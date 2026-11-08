@@ -11,7 +11,7 @@ backend. Qualquer hospedagem de arquivos estáticos serve.
 | Jogo | Pasta | Estado |
 |------|-------|--------|
 | Flag (adivinhe a bandeira) | `games/flag/` | disponível |
-| Rotas (caminho entre países) | `games/rotas/` | planejado |
+| Rotas (caminho entre países) | `games/rotas/` | disponível |
 
 Os nomes ainda são provisórios.
 
@@ -36,26 +36,33 @@ GGEO/
 ├── index.html              página inicial (catálogo de jogos)
 ├── css/
 │   ├── main.css            paleta, tema claro/escuro e base (todas as páginas)
-│   └── components.css      cabeçalho, botões e cartões da plataforma
+│   ├── components.css      cabeçalho, botões e cartões da plataforma
+│   └── game-shell.css      esqueleto comum dos jogos (cartão, botões do topo, configurações)
 ├── js/
 │   ├── theme.js            tema claro/escuro (todas as páginas)
+│   ├── font.js             tamanho da fonte, preferência única dos jogos
 │   ├── lang.js             escolhe o idioma antes da página aparecer
 │   ├── i18n.js             carrega os textos e troca o idioma
 │   ├── country-names.js    nomes de países/capitais por idioma e validação das respostas
 │   ├── games.js            LISTA dos jogos do catálogo
 │   ├── catalog.js          desenha os cartões a partir da lista
-│   └── main.js             ponto de entrada da página inicial
+│   ├── main.js             ponto de entrada da página inicial
+│   └── vendor/d3.min.js    biblioteca d3 (globo do Rotas), guardada aqui de propósito
 ├── i18n/
 │   ├── pt.json             textos em português (referência)
 │   ├── en.json             textos em inglês
-│   └── es.json             textos em espanhol
+│   ├── es.json             textos em espanhol
+│   └── zh.json             textos em mandarim
 ├── data/
-│   └── countries.json      países (compartilhado entre os jogos)
+│   ├── countries.json      países do Flag: nomes, capitais, apelidos
+│   ├── world-borders.json  193 países e suas fronteiras terrestres (Rotas)
+│   └── world-map.json      contornos dos países para o globo (Rotas)
 ├── games/
-│   └── flag/               um jogo = uma pasta independente
-│       ├── index.html
-│       ├── style.css
-│       └── game.js
+│   ├── flag/               um jogo = uma pasta independente
+│   │   ├── index.html
+│   │   ├── style.css
+│   │   └── game.js
+│   └── rotas/              idem
 └── docs/
     └── project-structure.md   explicação detalhada das decisões
 ```
@@ -78,9 +85,13 @@ O tema escuro está em `:root`; o claro sobrescreve só o que difere em
 2. Na `<head>`, importe o que é compartilhado (o `lang.js` vem antes do `theme.js`):
    ```html
    <script src="../../js/lang.js"></script>
+   <script src="../../js/font.js"></script>
    <script src="../../js/theme.js"></script>
    <link rel="stylesheet" href="../../css/main.css">
+   <link rel="stylesheet" href="../../css/game-shell.css">
    ```
+   Os botões do topo (idioma, tema, ⚙️ com tamanho da fonte) são os mesmos do
+   Flag: copie o bloco `top-controls` e o `settings-modal` do `games/flag/index.html`.
 3. Acrescente um item em `js/games.js` com `status: 'available'`.
 4. Acrescente `games.<id>.name` e `games.<id>.description` em cada arquivo de `i18n/`.
 
@@ -170,7 +181,7 @@ carregar bandeira e console sem erros.
 
 Nada disso está feito, e as decisões de produto são suas:
 
-- Escolher o nome definitivo do Flag e criar o jogo Rotas.
+- Escolher o nome definitivo do Flag e do Rotas.
 - Usar o logotipo oficial (hoje o cabeçalho tem a palavra GGEO em texto) e um
   favicon.
 - Recorde separado por dificuldade (hoje é só por região).
