@@ -34,6 +34,7 @@
                 <option value="large" data-i18n="settings.font.large">Grande</option>
                 <option value="xlarge" data-i18n="settings.font.xlarge">Muito Grande</option>
             </select>
+            <label class="check-row"><input type="checkbox" data-sound-toggle checked> <span data-i18n="settings.sound">Efeitos sonoros</span></label>
         </div>
 
         <header class="rotas-header">
@@ -75,6 +76,24 @@
                 <p id="hint-3-note" class="hint-note hidden" data-i18n="rotas.hint3Note">Toque ou passe o mouse sobre um país para ver a inicial.</p>
             </section>
 
+            <!-- Resultado: ocupa o lugar da busca, dos palpites e das dicas quando a rodada acaba -->
+            <section id="result" class="result hidden" aria-labelledby="result-title">
+                <h2 id="result-title">…</h2>
+                <p id="result-text" class="result-text hidden"></p>
+                <dl id="result-stats" class="result-stats"></dl>
+                <ul id="result-marks" class="result-marks" aria-hidden="true"></ul>
+                <div id="your-route-block">
+                    <p class="ideal-label" data-i18n="rotas.res.yourRoute">Sua rota:</p>
+                    <p id="your-route" class="ideal-route"></p>
+                </div>
+                <p class="ideal-label" data-i18n="rotas.idealRoute">Uma das menores rotas:</p>
+                <p id="ideal-route" class="ideal-route"></p>
+                <p class="hint-note" data-i18n="rotas.res.mapHint">Explore o mapa: passe o mouse ou toque nos países para ver os nomes.</p>
+                <button class="btn-primary" id="play-again-btn" data-i18n="rotas.playAgain">Jogar novamente</button>
+                <button class="secondary-btn" id="share-btn" data-i18n="rotas.res.share">Compartilhar resultado</button>
+                <p id="share-status" class="status" role="status"></p>
+            </section>
+
             <!-- Globo -->
             <div class="globe-wrap">
                 <div id="map" class="map" role="img" data-i18n-attr="aria-label:rotas.mapLabel" aria-label="Globo. Arraste para girar."></div>
@@ -89,18 +108,6 @@
 
         <noscript><p>JavaScript is required / Requer JavaScript.</p></noscript>
     </main>
-
-    <!-- Fim da rodada (vitória ou derrota) -->
-    <div id="end-modal" class="end-modal hidden" role="dialog" aria-modal="true" aria-labelledby="end-title">
-        <div class="end-card">
-            <h2 id="end-title">…</h2>
-            <p id="end-text" class="end-text hidden"></p>
-            <dl id="end-stats" class="end-stats"></dl>
-            <p class="ideal-label" data-i18n="rotas.idealRoute">Uma das menores rotas:</p>
-            <p id="ideal-route" class="ideal-route"></p>
-            <button class="btn-primary" id="play-again-btn" data-i18n="rotas.playAgain">Jogar novamente</button>
-        </div>
-    </div>
 
 </body>
 </html>

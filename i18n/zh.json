@@ -106,5 +106,12 @@
   "rotas.lose.title": "猜测次数用完",
   "rotas.lose.text": "你用完了所有猜测，但没有连通两个国家。",
   "rotas.idealRoute": "最短路线之一：",
-  "rotas.playAgain": "再玩一次"
+  "rotas.playAgain": "再玩一次",
+  "settings.sound": "音效",
+  "rotas.res.yourRoute": "你的路线：",
+  "rotas.res.mapHint": "探索地图：将鼠标移到国家上或点击国家即可查看名称。",
+  "rotas.res.share": "分享结果",
+  "rotas.res.copied": "结果已复制！",
+  "rotas.res.shareHeader": "GGEO · 路线：{from} → {to}",
+  "rotas.res.shareLine": "{n} 次猜测（最短：{ideal}）"
 }

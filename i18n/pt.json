@@ -106,5 +106,12 @@
   "rotas.lose.title": "Fim dos palpites",
   "rotas.lose.text": "Você usou todos os palpites sem conectar os dois países.",
   "rotas.idealRoute": "Uma das menores rotas:",
-  "rotas.playAgain": "Jogar novamente"
+  "rotas.playAgain": "Jogar novamente",
+  "settings.sound": "Efeitos sonoros",
+  "rotas.res.yourRoute": "Sua rota:",
+  "rotas.res.mapHint": "Explore o mapa: passe o mouse ou toque nos países para ver os nomes.",
+  "rotas.res.share": "Compartilhar resultado",
+  "rotas.res.copied": "Resultado copiado!",
+  "rotas.res.shareHeader": "GGEO · Rotas: {from} → {to}",
+  "rotas.res.shareLine": "{n} palpites (ideal: {ideal})"
 }

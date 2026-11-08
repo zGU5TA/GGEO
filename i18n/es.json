@@ -106,5 +106,12 @@
   "rotas.lose.title": "Sin intentos",
   "rotas.lose.text": "Usaste todos los intentos sin conectar los dos países.",
   "rotas.idealRoute": "Una de las rutas más cortas:",
-  "rotas.playAgain": "Jugar de nuevo"
+  "rotas.playAgain": "Jugar de nuevo",
+  "settings.sound": "Efectos de sonido",
+  "rotas.res.yourRoute": "Tu ruta:",
+  "rotas.res.mapHint": "Explora el mapa: pasa el cursor o toca los países para ver sus nombres.",
+  "rotas.res.share": "Compartir resultado",
+  "rotas.res.copied": "¡Resultado copiado!",
+  "rotas.res.shareHeader": "GGEO · Rutas: {from} → {to}",
+  "rotas.res.shareLine": "{n} intentos (ideal: {ideal})"
 }

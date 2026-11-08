@@ -17,6 +17,8 @@
  */
 import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
 import { countryName, acceptedAnswers, normalize } from '../../js/country-names.js';
+import { createAutocomplete } from '../../js/autocomplete.js';
+import { playSound, initSoundToggle } from '../../js/sound.js';
 
 const BORDERS_URL = new URL('../../data/world-borders.json', import.meta.url);
 const MAP_URL = new URL('../../data/world-map.json', import.meta.url);
@@ -25,7 +27,6 @@ const COUNTRIES_URL = new URL('../../data/countries.json', import.meta.url);
 const MIN_DISTANCE = 4;      // a origem e o destino ficam a 4 a 7 fronteiras de distância
 const MAX_DISTANCE = 7;
 const EXTRA_GUESSES = 10;    // palpites permitidos além do mínimo necessário
-const END_DELAY_MS = 900;    // tempo para ver o mapa antes do quadro final
 const MAP_SIZE = 480;        // tamanho "virtual" do desenho; o CSS ajusta à tela
 const MIN_SCALE = 50;
 const MAX_SCALE = 2000;
@@ -47,7 +48,7 @@ const hintBtns = [$('hint-1-btn'), $('hint-2-btn'), $('hint-3-btn')];
 const hint3Note = $('hint-3-note');
 const tooltipEl = $('tooltip');
 const globeWrap = document.querySelector('.globe-wrap');
-const endModal = $('end-modal');
+const resultEl = $('result');
 const settingsBtn = $('settings-btn');
 const settingsModal = $('settings-modal');
 
@@ -73,7 +74,8 @@ let hintsUsed = 0;
 let ended = null;          // null | { won: boolean }
 let idealPath = [];
 let statusState = null;    // { key, id?, state? }
-let endTimer = null;
+let yourPath = [];         // caminho montado pelos palpites (só na vitória)
+let copied = false;        // mostrou "resultado copiado"?
 let svg, projection, pathGenerator;
 
 // ================= Carregamento =================
@@ -201,27 +203,84 @@ function initGlobe() {
         .on('pointermove', (event, d) => { if (event.pointerType === 'mouse') showTip(event, d); })
         .on('pointerleave', hideTip)
         .on('click', (event, d) => {
+            if (gestureMoved) return;       // foi um arrasto/pinça, não um toque
             showTip(event, d);
             if (event.pointerType !== 'mouse') setTimeout(hideTip, 2200); // toque: some sozinho
         });
 
-    // Arrastar gira o globo; a roda do mouse aproxima/afasta.
-    svg.call(d3.drag().on('drag', (event) => {
-        const [lambda, phi] = projection.rotate();
-        const k = 75 / projection.scale();
-        projection.rotate([lambda + event.dx * k, Math.max(-90, Math.min(90, phi - event.dy * k))]);
-        hideTip();
-        redrawPaths();
-    }));
+    // Um dedo (ou o mouse) arrasta e gira o globo; dois dedos fazem pinça (zoom).
+    // A roda do mouse e os botões + e − também aproximam/afastam.
+    setupPointerGestures(svg.node());
     svg.on('wheel', (event) => {
         event.preventDefault();
         zoom(event.deltaY < 0 ? 1.1 : 0.9);
     });
 
-    $('zoom-in-btn').addEventListener('click', () => zoom(1.3));
-    $('zoom-out-btn').addEventListener('click', () => zoom(1 / 1.3));
-    $('center-map-btn').addEventListener('click', focusOnRoute);
+    $('zoom-in-btn').addEventListener('click', () => { playSound('click'); zoom(1.3); });
+    $('zoom-out-btn').addEventListener('click', () => { playSound('click'); zoom(1 / 1.3); });
+    $('center-map-btn').addEventListener('click', () => { playSound('click'); focusOnRoute(); });
     redrawPaths();
+}
+
+// ---- Gestos: arrastar (1 ponteiro) e pinça (2 ponteiros) com Pointer Events.
+// Não usamos pointer capture de propósito: ele desviaria o "click" dos países.
+let gestureMoved = false;   // o último gesto foi arrasto/pinça? (para ignorar o "click" seguinte)
+
+function setupPointerGestures(element) {
+    const pointers = new Map();   // pointerId -> { x, y }
+    let pinchStartDistance = 0;
+    let pinchStartScale = 0;
+    let travel = 0;
+
+    const pinchDistance = () => {
+        const [a, b] = [...pointers.values()];
+        return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+
+    element.addEventListener('pointerdown', (event) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        if (pointers.size === 0) { travel = 0; gestureMoved = false; }
+        pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        if (pointers.size === 2) {
+            pinchStartDistance = pinchDistance();
+            pinchStartScale = projection.scale();
+            gestureMoved = true;
+        }
+        hideTip();
+    });
+
+    window.addEventListener('pointermove', (event) => {
+        const last = pointers.get(event.pointerId);
+        if (!last) return;
+        const dx = event.clientX - last.x;
+        const dy = event.clientY - last.y;
+        last.x = event.clientX;
+        last.y = event.clientY;
+        travel += Math.hypot(dx, dy);
+        if (travel > 5) gestureMoved = true;
+
+        if (pointers.size === 2) {
+            if (pinchStartDistance > 0) {
+                const scale = pinchStartScale * (pinchDistance() / pinchStartDistance);
+                projection.scale(Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale)));
+                redrawPaths();
+            }
+        } else if (pointers.size === 1 && gestureMoved) {
+            // dx/dy estão em pixels da tela; o desenho usa MAP_SIZE unidades
+            const unit = MAP_SIZE / element.getBoundingClientRect().width;
+            const [lambda, phi] = projection.rotate();
+            const k = 75 / projection.scale();
+            projection.rotate([lambda + dx * unit * k, Math.max(-90, Math.min(90, phi - dy * unit * k))]);
+            redrawPaths();
+        }
+    });
+
+    const release = (event) => {
+        pointers.delete(event.pointerId);
+        if (pointers.size === 1) gestureMoved = true;   // sobrou um dedo depois da pinça
+    };
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
 }
 
 function zoom(factor) {
@@ -238,9 +297,9 @@ function countryClass(id) {
     if (id === startId) return 'country is-start';
     if (id === endId) return 'country is-end';
     if (guessStates[id]) return `country g-${guessStates[id]}`;
-    if (ended && !ended.won && idealPath.includes(id)) return 'country is-reveal';
+    if (ended && idealPath.includes(id)) return 'country is-reveal';
     if (hintsUsed >= 1 && ((graph[startId] || []).includes(id) || (graph[endId] || []).includes(id))) return 'country is-near';
-    if (hintsUsed >= 2) return 'country is-shown';
+    if (hintsUsed >= 2 || ended) return 'country is-shown';
     return 'country';
 }
 
@@ -271,7 +330,7 @@ function focusOnRoute() {
 function showTip(event, feature) {
     const id = featureId(feature);
     let text = null;
-    if (id === startId || id === endId || guessStates[id]) text = nameOf[id];
+    if (ended || id === startId || id === endId || guessStates[id]) text = nameOf[id];
     else if (hintsUsed >= 3 && nameOf[id]) text = `${Array.from(nameOf[id])[0].toUpperCase()}.`;
     if (!text) { hideTip(); return; }
     const box = globeWrap.getBoundingClientRect();
@@ -369,14 +428,14 @@ function renderStatus() {
     });
 }
 
-function renderModal() {
+function renderResult() {
     if (!ended) return;
-    $('end-title').textContent = t(ended.won ? 'rotas.win.title' : 'rotas.lose.title');
-    const text = $('end-text');
+    $('result-title').textContent = t(ended.won ? 'rotas.win.title' : 'rotas.lose.title');
+    const text = $('result-text');
     text.textContent = ended.won ? '' : t('rotas.lose.text');
     text.classList.toggle('hidden', ended.won);
 
-    const stats = $('end-stats');
+    const stats = $('result-stats');
     stats.textContent = '';
     const rows = [['rotas.win.ideal', minPath], ['rotas.win.guesses', guesses.length]];
     if (ended.won) {
@@ -392,7 +451,53 @@ function renderModal() {
         row.append(term, detail);
         stats.append(row);
     }
-    $('ideal-route').textContent = idealPath.map((id) => nameOf[id]).join(' → ');
+
+    // Um quadradinho por palpite, na ordem, com a cor/símbolo do resultado final.
+    const marks = $('result-marks');
+    marks.textContent = '';
+    for (const id of guesses) {
+        const item = document.createElement('li');
+        item.append(makeChip(guessStates[id]));
+        item.title = nameOf[id];
+        marks.append(item);
+    }
+
+    const names = (ids) => ids.map((id) => nameOf[id]).join(' → ');
+    $('your-route-block').classList.toggle('hidden', !ended.won);
+    $('your-route').textContent = names(yourPath);
+    $('ideal-route').textContent = names(idealPath);
+
+    $('share-btn').classList.toggle('hidden', !ended.won);
+    $('share-status').textContent = copied ? t('rotas.res.copied') : '';
+}
+
+// Texto para colar em conversas: rota, quadradinhos e número de palpites.
+function shareText() {
+    const square = { green: '🟩', yellow: '🟨', gray: '⬛' };
+    return [
+        t('rotas.res.shareHeader', { from: nameOf[startId], to: nameOf[endId] }),
+        guesses.map((id) => square[guessStates[id]]).join(''),
+        t('rotas.res.shareLine', { n: guesses.length, ideal: minPath }),
+        new URL('../../', location.href).href,
+    ].join('\n');
+}
+
+async function shareResult() {
+    const text = shareText();
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (error) {
+        // sem permissão de área de transferência: usa o método antigo
+        const box = document.createElement('textarea');
+        box.value = text;
+        document.body.append(box);
+        box.select();
+        document.execCommand('copy');
+        box.remove();
+    }
+    playSound('click');
+    copied = true;
+    renderResult();
 }
 
 function renderAll() {
@@ -402,89 +507,33 @@ function renderAll() {
     renderGuessButton();
     renderHints();
     renderStatus();
-    renderModal();
+    renderResult();
 }
 
 // ================= Autocompletar =================
 
-let suggestionIds = [];
-let activeIndex = -1;
-
-function closeSuggestions() {
-    suggestionsEl.classList.add('hidden');
-    suggestionsEl.textContent = '';
-    suggestionIds = [];
-    activeIndex = -1;
-    inputEl.setAttribute('aria-expanded', 'false');
-    inputEl.removeAttribute('aria-activedescendant');
-}
-
-function setActive(index) {
-    const options = suggestionsEl.children;
-    if (options.length === 0) return;
-    activeIndex = (index + options.length) % options.length;
-    [...options].forEach((option, i) => option.setAttribute('aria-selected', String(i === activeIndex)));
-    inputEl.setAttribute('aria-activedescendant', options[activeIndex].id);
-    options[activeIndex].scrollIntoView({ block: 'nearest' });
-}
-
-function highlight(name, query) {
-    const fragment = document.createDocumentFragment();
-    const normalized = normalize(name);
-    const at = normalized.length === name.length ? normalized.indexOf(query) : -1;
-    if (at === -1) {
-        fragment.append(name);
-    } else {
-        const mark = document.createElement('mark');
-        mark.textContent = name.slice(at, at + query.length);
-        fragment.append(name.slice(0, at), mark, name.slice(at + query.length));
-    }
-    return fragment;
-}
-
-function updateSuggestions() {
-    const query = normalize(inputEl.value.trim());
-    closeSuggestions();
-    if (!query || ended || !ready) return;
-    const used = new Set([...guesses, startId, endId]);
-    const rank = (entry) => (entry.keys.includes(query) ? 0 : entry.keys.some((k) => k.startsWith(query)) ? 1 : 2);
-    const matches = entries
-        .filter((entry) => !used.has(entry.id) && entry.keys.some((k) => k.includes(query)))
-        .sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name, getLang()))
-        .slice(0, 40);
-    if (matches.length === 0) return;
-    matches.forEach((entry, index) => {
-        const option = document.createElement('li');
-        option.id = `suggestion-${index}`;
-        option.setAttribute('role', 'option');
-        option.setAttribute('aria-selected', 'false');
-        option.append(highlight(entry.name, query));
-        // pointerdown (e não click) para o campo não perder o foco antes da escolha
-        option.addEventListener('pointerdown', (event) => { event.preventDefault(); chooseSuggestion(index); });
-        suggestionsEl.append(option);
-        suggestionIds.push(entry.id);
-    });
-    suggestionsEl.classList.remove('hidden');
-    inputEl.setAttribute('aria-expanded', 'true');
-}
-
-function chooseSuggestion(index) {
-    const id = suggestionIds[index];
-    closeSuggestions();
-    if (id) submitGuess(id);
-}
+const suggestions = createAutocomplete({
+    input: inputEl,
+    list: suggestionsEl,
+    getEntries: () => entries,
+    isExcluded: (id) => id === startId || id === endId || guesses.includes(id),
+    isEnabled: () => ready && !ended,
+    onChoose: (id) => submitGuess(id),
+    onEnter: () => submitTyped(),
+});
 
 // ================= Rodada =================
 
 function startNewRound() {
-    clearTimeout(endTimer);
     guesses = [];
     guessStates = {};
     hintsUsed = 0;
     ended = null;
     idealPath = [];
     statusState = null;
-    endModal.classList.add('hidden');
+    yourPath = [];
+    copied = false;
+    showPanels();
     hideTip();
 
     const candidates = Object.keys(graph).filter((id) => graph[id].length > 0);
@@ -505,7 +554,7 @@ function startNewRound() {
     inputEl.value = '';
     inputEl.disabled = false;
     guessBtn.disabled = false;
-    closeSuggestions();
+    suggestions.close();
     renderAll();
     drawMap();
     focusOnRoute();
@@ -516,50 +565,60 @@ function submitGuess(id) {
     if (ended || !id) return;
     if (id === startId || id === endId) {
         inputEl.value = '';
+        playSound('error');
         setStatus('rotas.inRoute', { id });
         return;
     }
     if (guesses.includes(id)) {
         inputEl.value = '';
+        playSound('error');
         setStatus('rotas.duplicate', { id });
         return;
     }
     guesses.push(id);
     inputEl.value = '';
-    closeSuggestions();
+    suggestions.close();
     evaluateGuesses();
     setStatus('rotas.result', { id, state: guessStates[id] });
     renderGuesses();
     renderGuessButton();
     drawMap();
-    checkEnd();
+    if (!checkEnd()) playSound({ green: 'success', yellow: 'detour', gray: 'error' }[guessStates[id]]);
 }
 
 function submitTyped() {
     const id = exact.get(normalize(inputEl.value.trim()));
     if (!id) {
-        if (inputEl.value.trim()) setStatus('rotas.notFound');
+        if (inputEl.value.trim()) { playSound('error'); setStatus('rotas.notFound'); }
         return;
     }
     submitGuess(id);
 }
 
+// Devolve true se a rodada acabou (vitória ou fim dos palpites).
 function checkEnd() {
     const allowed = new Set([...guesses, startId]);
-    const connected = !!shortestPath(startId, endId, allowed);
-    if (!connected && guesses.length < maxGuesses) return;
+    const path = shortestPath(startId, endId, allowed);
+    if (!path && guesses.length < maxGuesses) return false;
 
-    ended = { won: connected };
-    inputEl.disabled = true;
-    guessBtn.disabled = true;
-    closeSuggestions();
-    renderHints();
+    ended = { won: !!path };
+    yourPath = path || [];
+    suggestions.close();
+    hideTip();
+    showPanels();
+    renderResult();
     drawMap();
-    renderModal();
-    endTimer = setTimeout(() => {
-        endModal.classList.remove('hidden');
-        $('play-again-btn').focus();
-    }, END_DELAY_MS);
+    playSound(ended.won ? 'win' : 'lose');
+    $('play-again-btn').focus({ preventScroll: true });
+    return true;
+}
+
+// Ao acabar a rodada, busca/palpites/dicas dão lugar ao resultado (e o mapa fica livre).
+function showPanels() {
+    for (const panel of document.querySelectorAll('.guess-area, .guesses, .hints')) {
+        panel.classList.toggle('hidden', !!ended);
+    }
+    resultEl.classList.toggle('hidden', !ended);
 }
 
 // ================= Dicas =================
@@ -568,6 +627,7 @@ hintBtns.forEach((button, index) => {
     button.addEventListener('click', () => {
         if (index !== hintsUsed || ended) return;
         hintsUsed++;
+        playSound('click');
         renderHints();
         drawMap();
     });
@@ -575,24 +635,9 @@ hintBtns.forEach((button, index) => {
 
 // ================= Eventos =================
 
-inputEl.addEventListener('input', updateSuggestions);
-inputEl.addEventListener('blur', () => setTimeout(closeSuggestions, 120));
-inputEl.addEventListener('keydown', (event) => {
-    const open = !suggestionsEl.classList.contains('hidden');
-    if (event.key === 'ArrowDown') { event.preventDefault(); if (open) setActive(activeIndex + 1); else updateSuggestions(); }
-    else if (event.key === 'ArrowUp') { event.preventDefault(); if (open) setActive(activeIndex - 1); }
-    else if (event.key === 'Escape') { closeSuggestions(); }
-    else if (event.key === 'Enter') {
-        event.preventDefault();
-        if (open && suggestionIds.length > 0) chooseSuggestion(activeIndex >= 0 ? activeIndex : 0);
-        else submitTyped();
-    }
-});
-guessBtn.addEventListener('click', () => { closeSuggestions(); submitTyped(); inputEl.focus(); });
-$('play-again-btn').addEventListener('click', startNewRound);
-
-// O quadro final só tem um botão: mantém o foco nele enquanto estiver aberto.
-endModal.addEventListener('keydown', (event) => { if (event.key === 'Tab') { event.preventDefault(); $('play-again-btn').focus(); } });
+guessBtn.addEventListener('click', () => { suggestions.close(); submitTyped(); inputEl.focus(); });
+$('play-again-btn').addEventListener('click', () => { playSound('click'); startNewRound(); });
+$('share-btn').addEventListener('click', shareResult);
 
 // Configurações (tamanho da fonte)
 function toggleSettings(force) {
@@ -600,7 +645,7 @@ function toggleSettings(force) {
     settingsModal.classList.toggle('active', open);
     settingsBtn.setAttribute('aria-expanded', String(open));
 }
-settingsBtn.addEventListener('click', () => toggleSettings());
+settingsBtn.addEventListener('click', () => { playSound('click'); toggleSettings(); });
 window.addEventListener('click', (event) => {
     if (!event.target.closest('.top-controls') && !event.target.closest('.settings-modal')) toggleSettings(false);
 });
@@ -610,7 +655,7 @@ window.addEventListener('keydown', (event) => { if (event.key === 'Escape') togg
 onLangChange(() => {
     if (!ready) return;
     buildNames();
-    closeSuggestions();
+    suggestions.close();
     renderAll();
 });
 
@@ -621,6 +666,7 @@ async function init() {
         if (!d3) throw new Error('d3 não carregou');
         await Promise.all([loadData(), initI18n()]);
         buildNames();
+        initSoundToggle();
         initGlobe();
         ready = true;
         startNewRound();

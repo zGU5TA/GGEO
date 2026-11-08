@@ -106,5 +106,12 @@
   "rotas.lose.title": "Out of guesses",
   "rotas.lose.text": "You used all your guesses without connecting the two countries.",
   "rotas.idealRoute": "One of the shortest routes:",
-  "rotas.playAgain": "Play again"
+  "rotas.playAgain": "Play again",
+  "settings.sound": "Sound effects",
+  "rotas.res.yourRoute": "Your route:",
+  "rotas.res.mapHint": "Explore the map: hover or tap countries to see their names.",
+  "rotas.res.share": "Share result",
+  "rotas.res.copied": "Result copied!",
+  "rotas.res.shareHeader": "GGEO · Routes: {from} → {to}",
+  "rotas.res.shareLine": "{n} guesses (ideal: {ideal})"
 }

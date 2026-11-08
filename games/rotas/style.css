@@ -39,7 +39,7 @@ body {
     display: grid;
     gap: 1rem;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "route" "guess" "globe" "guesses" "hints";
+    grid-template-areas: "route" "result" "guess" "globe" "guesses" "hints";
 }
 
 .route    { grid-area: route; }
@@ -51,9 +51,10 @@ body {
 @media (min-width: 820px) {
     .rotas-layout {
         grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
-        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        grid-template-rows: auto auto auto minmax(0, 1fr) auto;
         grid-template-areas:
             "route   route"
+            "result  globe"
             "guess   globe"
             "guesses globe"
             "hints   globe";
@@ -87,41 +88,9 @@ body {
 
 /* ---------- Campo de palpite ---------- */
 
-.combo { position: relative; }
 
 .guess-area .btn-primary { margin-top: 0.5rem; }
 .guess-area .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.suggestions {
-    position: absolute;
-    z-index: 20;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    max-height: 11rem;
-    overflow-y: auto;
-    background: var(--surface);
-    border: 1px solid var(--fg);
-    border-top: 0;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
-}
-
-.suggestions li {
-    padding: 0.6rem 0.75rem;
-    cursor: pointer;
-    border-bottom: 1px solid var(--border);
-}
-.suggestions li:last-child { border-bottom: 0; }
-.suggestions li:hover,
-.suggestions li[aria-selected="true"] {
-    background: var(--surface-2);
-}
-.suggestions li[aria-selected="true"] { outline: 2px solid var(--fg); outline-offset: -2px; }
-.suggestions mark { background: none; color: var(--accent); font-weight: bold; }
-:root[data-theme="light"] .suggestions mark { color: var(--fg); text-decoration: underline; }
 
 .status {
     margin: 0.5rem 0 0;
@@ -286,44 +255,39 @@ body {
 .map-controls button + button { border-top: 1px solid var(--border); }
 .map-controls button:hover { background: var(--surface-2); }
 
-/* ---------- Fim da rodada ---------- */
+/* ---------- Resultado (no lugar da busca, palpites e dicas) ---------- */
 
-.end-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.result {
+    grid-area: result;
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.8);
-}
-.end-modal.hidden { display: none; }
-
-.end-card {
-    width: 100%;
-    max-width: 24rem;
-    padding: 1.5rem;
-    background: var(--bg);
-    color: var(--fg);
-    border: 2px solid var(--border);
-    text-align: center;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-.end-card h2 { margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.end-text { margin: 0 0 1rem; }
-.end-stats {
-    margin: 0 0 1rem;
-    padding: 0.75rem;
     background: var(--surface-2);
     border: 1px solid var(--border);
+    align-self: start;
 }
-.end-stats div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.2rem 0; }
-.end-stats dt { color: var(--muted); font-size: 0.85em; text-align: left; }
-.end-stats dd { margin: 0; font-weight: bold; text-align: right; }
+.result h2 { margin: 0 0 0.75rem; font-size: 1.3em; text-transform: uppercase; letter-spacing: 0.08em; }
+.result-text { margin: 0 0 0.75rem; }
+.result-stats { margin: 0 0 0.75rem; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); }
+.result-stats div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.2rem 0; }
+.result-stats dt { color: var(--muted); font-size: 0.85em; }
+.result-stats dd { margin: 0; font-weight: bold; text-align: right; }
+.result-marks { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 0.9rem; padding: 0; list-style: none; }
+.result-marks .chip { min-width: 1.8em; height: 1.8em; }
 .ideal-label { margin: 0 0 0.25rem; font-size: 0.8em; color: var(--muted); }
-.ideal-route { margin: 0 0 1rem; font-weight: bold; overflow-wrap: anywhere; }
+.ideal-route { margin: 0 0 0.9rem; font-weight: bold; overflow-wrap: anywhere; }
+.result .btn-primary { margin-top: 0.5rem; padding-block: 1rem; font-size: 1.05em; }
+
+.secondary-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.7rem;
+    font: inherit;
+    font-weight: bold;
+    color: var(--fg);
+    background: transparent;
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+.secondary-btn:hover { border-color: var(--fg); }
 
 @media (max-width: 480px) {
     .container.rotas { padding: 1rem; }
