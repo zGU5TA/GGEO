@@ -33,6 +33,7 @@
                 <option value="large" data-i18n="settings.font.large">Grande</option>
                 <option value="xlarge" data-i18n="settings.font.xlarge">Muito Grande</option>
             </select>
+            <label class="check-row"><input type="checkbox" data-sound-toggle checked> <span data-i18n="settings.sound">Efeitos sonoros</span></label>
         </div>
 
         <!-- MENU INICIAL -->
@@ -89,7 +90,10 @@
 
             <div id="game-area">
                 <div class="input-group">
-                    <input type="text" id="guess-input" data-i18n-attr="placeholder:flag.placeholder; aria-label:flag.placeholder" placeholder="Digite o nome do país..." aria-label="Digite o nome do país..." autocomplete="off">
+                    <div class="combo">
+                        <input type="text" id="guess-input" data-i18n-attr="placeholder:flag.placeholder; aria-label:flag.placeholder" placeholder="Digite o nome do país..." aria-label="Digite o nome do país..." autocomplete="off" autocapitalize="off" spellcheck="false">
+                        <ul id="suggestions" class="suggestions hidden"></ul>
+                    </div>
                     <button class="btn-primary" id="guess-btn" style="width: auto; margin-top:0;" data-i18n="flag.send">Enviar</button>
                 </div>
             </div>

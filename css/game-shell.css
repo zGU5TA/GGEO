@@ -189,3 +189,53 @@ p.subtitle {
     margin-bottom: 1.5rem;
     font-size: 0.9em;
 }
+
+/* ---------- Sugestões de países (js/autocomplete.js) ---------- */
+
+.combo { position: relative; flex: 1; min-width: 0; }
+
+.suggestions {
+    position: absolute;
+    z-index: 20;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 11rem;
+    overflow-y: auto;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--fg);
+    border-top: 0;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.suggestions li {
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+}
+.suggestions li:last-child { border-bottom: 0; }
+.suggestions li:hover,
+.suggestions li[aria-selected="true"] { background: var(--surface-2); }
+.suggestions li[aria-selected="true"] { outline: 2px solid var(--fg); outline-offset: -2px; }
+.suggestions mark { background: none; color: var(--accent); font-weight: bold; }
+:root[data-theme="light"] .suggestions mark { color: var(--fg); text-decoration: underline; }
+
+/* ---------- Efeitos sonoros (checkbox nas configurações) ---------- */
+
+.settings-modal .check-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.9rem 0 0;
+    cursor: pointer;
+}
+.settings-modal .check-row input {
+    width: auto;
+    padding: 0;
+    margin: 0;
+    accent-color: var(--accent);
+}

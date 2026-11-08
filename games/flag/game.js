@@ -1,5 +1,7 @@
 import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
-import { countryName, capitalName, matchesCountry } from '../../js/country-names.js';
+import { countryName, capitalName, matchesCountry, acceptedAnswers } from '../../js/country-names.js';
+import { createAutocomplete } from '../../js/autocomplete.js';
+import { playSound, initSoundToggle } from '../../js/sound.js';
 
 // A lista de países fica em data/countries.json, compartilhada entre os jogos.
 // import.meta.url resolve o caminho a partir deste arquivo, então funciona
@@ -85,44 +87,6 @@ async function loadCountries() {
         console.error('Falha ao carregar data/countries.json:', error);
         setText(menuMessage, 'flag.loadError');
         menuMessage.className = "message error";
-    }
-}
-
-// O AudioContext só é criado no primeiro som (depois de um clique do jogador),
-// porque os navegadores bloqueiam áudio iniciado sem interação do usuário.
-let audioCtx = null;
-function playSound(type) {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    const now = audioCtx.currentTime;
-    if (type === 'success') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
-    } else if (type === 'error') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.setValueAtTime(100, now + 0.1);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
-    } else if (type === 'click') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
     }
 }
 
@@ -341,6 +305,7 @@ function checkGuess() {
 
 function endRound() {
     roundEnded = true;
+    suggestions.close();
     guessInput.disabled = true;
     guessBtn.disabled = true;
     
@@ -372,10 +337,28 @@ function handleRoundAction() {
     guessInput.focus();
 }
 
-guessInput.addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
+// Sugestões de países enquanto digita (setas, Enter, mouse). Escolher uma
+// sugestão já envia o palpite, como no Rotas. O Enter com a lista fechada
+// envia o que está digitado.
+let searchEntries = [];
+function buildSearchEntries() {
+    const lang = getLang();
+    searchEntries = countries.map((country) => ({
+        id: country.code,
+        name: countryName(country, lang),
+        keys: [...acceptedAnswers(country, lang)],
+    }));
+}
+const suggestions = createAutocomplete({
+    input: guessInput,
+    list: document.getElementById('suggestions'),
+    getEntries: () => searchEntries,
+    isEnabled: () => !roundEnded && !guessInput.disabled,
+    onChoose: (id, name) => {
+        guessInput.value = name;
         handleAction();
-    }
+    },
+    onEnter: handleAction,
 });
 
 // Não existe listener de Enter para o botão "Próxima": um <button> já dispara
@@ -396,7 +379,11 @@ document.getElementById('font-size-select').addEventListener('change', () => pla
 onLangChange(() => {
     renderMessage();
     renderHint();
+    buildSearchEntries();
+    suggestions.close();
 });
 
+initSoundToggle();
 await initI18n();
-loadCountries();
+await loadCountries();
+buildSearchEntries();
