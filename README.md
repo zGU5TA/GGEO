@@ -41,6 +41,8 @@ GGEO/
 ├── js/
 │   ├── theme.js            tema claro/escuro (todas as páginas)
 │   ├── font.js             tamanho da fonte, preferência única dos jogos
+│   ├── sound.js            efeitos sonoros (e o liga/desliga) compartilhados pelos jogos
+│   ├── autocomplete.js     sugestões de países enquanto digita (Flag e Rotas)
 │   ├── lang.js             escolhe o idioma antes da página aparecer
 │   ├── i18n.js             carrega os textos e troca o idioma
 │   ├── country-names.js    nomes de países/capitais por idioma e validação das respostas
@@ -90,8 +92,10 @@ O tema escuro está em `:root`; o claro sobrescreve só o que difere em
    <link rel="stylesheet" href="../../css/main.css">
    <link rel="stylesheet" href="../../css/game-shell.css">
    ```
-   Os botões do topo (idioma, tema, ⚙️ com tamanho da fonte) são os mesmos do
-   Flag: copie o bloco `top-controls` e o `settings-modal` do `games/flag/index.html`.
+   Os botões do topo (idioma, tema, ⚙️ com tamanho da fonte e sons) são os
+   mesmos do Flag: copie o bloco `top-controls` e o `settings-modal` do
+   `games/flag/index.html`. Sons: `import { playSound } from '../../js/sound.js'`;
+   sugestões ao digitar: `createAutocomplete` de `js/autocomplete.js`.
 3. Acrescente um item em `js/games.js` com `status: 'available'`.
 4. Acrescente `games.<id>.name` e `games.<id>.description` em cada arquivo de `i18n/`.
 

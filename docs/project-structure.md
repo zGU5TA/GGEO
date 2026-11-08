@@ -84,6 +84,14 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   `<select data-font-select>`. A preferência vale para todos os jogos
   (`ggeo_font`); a antiga do Flag (`ggeo_flag_font`) é copiada uma vez.
 
+### Sugestões ao digitar e sons (Flag e Rotas)
+
+- `js/autocomplete.js`: lista de sugestões com mouse, setas ↑ ↓, Enter e Esc,
+  no padrão *combobox* de acessibilidade. Escolher uma sugestão **já envia** o
+  palpite (nos dois jogos). Procura no nome do idioma atual e nos apelidos
+  ("usa" sugere United States), ignorando acentos.
+- `js/sound.js`: sons gerados pelo navegador, um liga/desliga único (`ggeo_sound`).
+
 ### Rotas
 
 - **Dados dentro do repositório.** O protótipo original buscava fronteiras e
@@ -104,13 +112,22 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
 - **Nomes e respostas** usam as mesmas regras do Flag (só o idioma atual vale;
   `country-names.js`). Países fora do `countries.json` usam o nome do navegador
   e não têm apelidos.
-- **Mudanças em relação ao protótipo:** quadro de derrota (antes o jogo
+- **Mudanças em relação ao protótipo:** tela de derrota (antes o jogo
   simplesmente travava), rota ideal mostrada no fim, mensagens para palpite
   repetido/desconhecido, dica 3 também por toque (antes só passando o mouse),
   símbolos ✓ ~ ✕ além das cores, autocompletar acessível por teclado, globo
   centralizado entre origem e destino, cores que seguem o tema claro/escuro.
-- **Fica em aberto:** sem efeitos sonoros (o Flag tem), sem recorde/estatísticas,
-  sem zoom por gesto de pinça (há botões + e −), sem rota diária.
+- **Fim da rodada:** em vez de um quadro por cima de tudo (como no protótipo),
+  busca, palpites e dicas dão lugar a um painel de resultado (palpites, falhas,
+  um quadradinho por palpite, sua rota, uma rota ideal, jogar novamente e
+  compartilhar, no estilo do Travle). O mapa fica livre: mostra todos os
+  contornos e o nome de qualquer país ao passar o mouse/tocar.
+- **Gestos no globo:** um dedo (ou o mouse) gira, dois dedos fazem pinça
+  (Pointer Events, sem pointer capture para não atrapalhar o toque nos países);
+  roda do mouse e botões + e − também funcionam.
+- **Sons:** `js/sound.js`, gerados no navegador (sem arquivos de áudio), com
+  liga/desliga em ⚙️. Compartilhado com o Flag.
+- **Fica em aberto:** sem recorde/estatísticas e sem rota diária.
 
 ### Países em `data/countries.json`
 
@@ -137,6 +154,7 @@ dela, então adicionar um jogo não exige mexer em `index.html`.
 | `ggeo_theme` | `dark` ou `light` | compartilhada por todas as páginas |
 | `ggeo_lang` | `pt`, `en`, `es` ou `zh` | só é gravada quando a pessoa escolhe no seletor |
 | `ggeo_font` | `small`, `medium`, `large` ou `xlarge` | tamanho da fonte, único para todos os jogos |
+| `ggeo_sound` | `off` | só existe se a pessoa desligou os sons (ausente = ligado); vale para todos os jogos |
 | `ggeo_flag_records` | recorde por região do jogo Flag | |
 | `ggeo_flag_font` | (antiga) fonte do Flag | só lida uma vez: o valor é copiado para `ggeo_font` |
 
