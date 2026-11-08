@@ -15,8 +15,9 @@ let score = 0;
 // Chaves do localStorage. Antes da GGEO o jogo se chamava Flagle e usava chaves
 // "flagle_*". Na primeira visita os valores antigos são COPIADOS para as chaves
 // novas (as antigas não são apagadas, para ser possível voltar atrás).
-const STORAGE = { records: 'ggeo_flag_records', font: 'ggeo_flag_font' };
-const LEGACY_STORAGE = { records: 'flagle_records', font: 'flagle_font' };
+const STORAGE = { records: 'ggeo_flag_records' };
+const LEGACY_STORAGE = { records: 'flagle_records' };
+// (O tamanho da fonte é guardado por js/font.js, preferência única de todos os jogos.)
 
 function migrateLegacyStorage() {
     try {
@@ -129,21 +130,9 @@ function playSound(type) {
 // Aqui só falta tocar o som de clique no botão de tema.
 themeToggle.addEventListener('click', () => playSound('click'));
 
-window.addEventListener('DOMContentLoaded', () => {
-    const savedFont = localStorage.getItem(STORAGE.font) || 'medium';
-    document.documentElement.setAttribute('data-font', savedFont);
-    document.getElementById('font-size-select').value = savedFont;
-});
-
 function toggleSettings() {
     playSound('click');
     settingsModal.classList.toggle('active');
-}
-
-function changeFontSize(size) {
-    playSound('click');
-    document.documentElement.setAttribute('data-font', size);
-    localStorage.setItem(STORAGE.font, size);
 }
 
 window.addEventListener('click', function(e) {
@@ -401,7 +390,7 @@ guessBtn.addEventListener('click', handleAction);
 nextBtn.addEventListener('click', handleRoundAction);
 document.getElementById('back-btn').addEventListener('click', returnToMenu);
 document.getElementById('settings-btn').addEventListener('click', toggleSettings);
-document.getElementById('font-size-select').addEventListener('change', (event) => changeFontSize(event.target.value));
+document.getElementById('font-size-select').addEventListener('change', () => playSound('click'));
 
 // Se a pessoa trocar o idioma no meio da rodada, o que foi montado em JS é refeito.
 onLangChange(() => {

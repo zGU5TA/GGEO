@@ -6,9 +6,12 @@
     <title data-i18n="flag.title">Flag — GGEO</title>
     <!-- Idioma escolhido antes de desenhar a página. Veja js/lang.js -->
     <script src="../../js/lang.js"></script>
+    <!-- Tamanho da fonte (preferência única dos jogos). Veja js/font.js -->
+    <script src="../../js/font.js"></script>
     <!-- Tema aplicado antes de desenhar a página (evita piscar). Veja js/theme.js -->
     <script src="../../js/theme.js"></script>
     <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/game-shell.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,17 +21,17 @@
         <div class="top-controls">
             <div class="lang-picker"><span aria-hidden="true">🌐</span><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
             <button class="icon-btn" id="theme-toggle" data-theme-toggle>🌙</button>
-            <button class="icon-btn" id="settings-btn" data-i18n-attr="title:flag.settings; aria-label:flag.settings" title="Configurações" aria-label="Configurações">⚙️</button>
+            <button class="icon-btn" id="settings-btn" data-i18n-attr="title:settings.title; aria-label:settings.title" title="Configurações" aria-label="Configurações">⚙️</button>
         </div>
 
         <!-- MODAL DE CONFIGURAÇÕES -->
         <div id="settings-modal" class="settings-modal">
-            <label for="font-size-select" data-i18n="flag.fontSize">Tamanho da Fonte:</label>
-            <select id="font-size-select">
-                <option value="small" data-i18n="flag.font.small">Pequena</option>
-                <option value="medium" data-i18n="flag.font.medium" selected>Média</option>
-                <option value="large" data-i18n="flag.font.large">Grande</option>
-                <option value="xlarge" data-i18n="flag.font.xlarge">Muito Grande</option>
+            <label for="font-size-select" data-i18n="settings.fontSize">Tamanho da Fonte:</label>
+            <select id="font-size-select" data-font-select>
+                <option value="small" data-i18n="settings.font.small">Pequena</option>
+                <option value="medium" data-i18n="settings.font.medium" selected>Média</option>
+                <option value="large" data-i18n="settings.font.large">Grande</option>
+                <option value="xlarge" data-i18n="settings.font.xlarge">Muito Grande</option>
             </select>
         </div>
 

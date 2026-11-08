@@ -51,7 +51,7 @@ export function capitalName(country, lang = getLang()) {
     return (country.capitals && country.capitals[lang]) || country.capital;
 }
 
-function normalize(text) {
+export function normalize(text) {
     return text
         .normalize('NFD')
         .replace(/[̀-ͯ]/g, '')
