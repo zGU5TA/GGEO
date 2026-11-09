@@ -117,6 +117,11 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   repetido/desconhecido, dica 3 também por toque (antes só passando o mouse),
   símbolos ✓ ~ ✕ além das cores, autocompletar acessível por teclado, globo
   centralizado entre origem e destino, cores que seguem o tema claro/escuro.
+- **Sorteio com memória:** cada rodada escolhe entre todos os pares válidos
+  (3.075), dando menos chance a quem tem países que apareceram há pouco. A
+  memória decai a cada rodada e fica no `localStorage` (`ggeo_rotas_recent`).
+  Assim passagens obrigatórias (Panamá, Rússia) não dominam, sem limitar
+  quantas partidas a pessoa joga. Ajuste em `RECENT_DECAY` e `RECENT_PENALTY`.
 - **Fim da rodada:** em vez de um quadro por cima de tudo (como no protótipo),
   busca, palpites e dicas dão lugar a um painel de resultado (palpites, falhas,
   um quadradinho por palpite, sua rota, uma rota ideal, jogar novamente e
@@ -154,6 +159,7 @@ dela, então adicionar um jogo não exige mexer em `index.html`.
 | `ggeo_theme` | `dark` ou `light` | compartilhada por todas as páginas |
 | `ggeo_lang` | `pt`, `en`, `es` ou `zh` | só é gravada quando a pessoa escolhe no seletor |
 | `ggeo_font` | `small`, `medium`, `large` ou `xlarge` | tamanho da fonte, único para todos os jogos |
+| `ggeo_rotas_recent` | objeto `{país: peso}` | memória do sorteio de rotas (pode ser apagada sem problema) |
 | `ggeo_sound` | `off` | só existe se a pessoa desligou os sons (ausente = ligado); vale para todos os jogos |
 | `ggeo_flag_records` | recorde por região do jogo Flag | |
 | `ggeo_flag_font` | (antiga) fonte do Flag | só lida uma vez: o valor é copiado para `ggeo_font` |

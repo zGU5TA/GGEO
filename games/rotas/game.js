@@ -27,6 +27,13 @@ const COUNTRIES_URL = new URL('../../data/countries.json', import.meta.url);
 const MIN_DISTANCE = 4;      // a origem e o destino ficam a 4 a 7 fronteiras de distância
 const MAX_DISTANCE = 7;
 const EXTRA_GUESSES = 10;    // palpites permitidos além do mínimo necessário
+
+// Sorteio com memória: países que apareceram em rodadas recentes têm menos chance
+// de aparecer de novo (o "peso" de cada país decai a cada rodada). Assim passagens
+// obrigatórias como Panamá ou a Rússia não dominam, sem limitar quantas vezes se joga.
+const RECENT_KEY = 'ggeo_rotas_recent';
+const RECENT_DECAY = 0.95;   // quanto da memória sobra a cada rodada
+const RECENT_PENALTY = 0.8;  // quanto cada aparição recente reduz a chance (maior = mais variedade)
 const MAP_SIZE = 480;        // tamanho "virtual" do desenho; o CSS ajusta à tela
 const MIN_SCALE = 50;
 const MAX_SCALE = 2000;
@@ -132,8 +139,67 @@ function distancesFrom(source) {
     return dist;
 }
 
+function shuffled(list) {
+    const copy = [...list];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+// Todos os pares origem/destino válidos, com os países que ficam no meio de algum
+// caminho mínimo. Calculado uma vez (alguns milhares de pares, instantâneo).
+let routePairs = null;
+function buildRoutePairs() {
+    const ids = Object.keys(graph).filter((id) => graph[id].length > 0);
+    const dist = {};
+    for (const id of ids) dist[id] = distancesFrom(id);
+    routePairs = [];
+    for (const a of ids) {
+        for (const b of ids) {
+            const d = dist[a][b];
+            if (a >= b || d === undefined || d < MIN_DISTANCE || d > MAX_DISTANCE) continue;
+            const middle = ids.filter((x) => x !== a && x !== b && dist[a][x] + dist[x][b] === d);
+            routePairs.push({ a, b, d, members: [a, b, ...middle] });
+        }
+    }
+}
+
+function loadRecent() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || {}; } catch (error) { return {}; }
+}
+
+function saveRecent(recent) {
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch (error) { /* sem persistência */ }
+}
+
+// Escolhe a próxima rota e atualiza a memória dos países usados.
+function pickRoute() {
+    if (!routePairs) buildRoutePairs();
+    const recent = loadRecent();
+    const weights = routePairs.map((pair) => {
+        let load = 0;
+        for (const id of pair.members) load += recent[id] || 0;
+        return Math.exp(-RECENT_PENALTY * load);
+    });
+    let roll = Math.random() * weights.reduce((sum, w) => sum + w, 0);
+    let chosen = routePairs[routePairs.length - 1];
+    for (let i = 0; i < routePairs.length; i++) {
+        roll -= weights[i];
+        if (roll <= 0) { chosen = routePairs[i]; break; }
+    }
+    for (const id of Object.keys(recent)) {
+        recent[id] *= RECENT_DECAY;
+        if (recent[id] < 0.02) delete recent[id];
+    }
+    for (const id of chosen.members) recent[id] = (recent[id] || 0) + 1;
+    saveRecent(recent);
+    return Math.random() < 0.5 ? [chosen.a, chosen.b, chosen.d] : [chosen.b, chosen.a, chosen.d];
+}
+
 // Menor caminho de `from` até `to`, passando só por `allowed` (se informado).
-function shortestPath(from, to, allowed = null) {
+function shortestPath(from, to, allowed = null, randomize = false) {
     const previous = { [from]: null };
     const queue = [from];
     for (let i = 0; i < queue.length; i++) {
@@ -143,7 +209,8 @@ function shortestPath(from, to, allowed = null) {
             for (let at = to; at !== null; at = previous[at]) path.unshift(at);
             return path;
         }
-        for (const next of graph[node] || []) {
+        const neighbors = graph[node] || [];
+        for (const next of randomize ? shuffled(neighbors) : neighbors) {
             if (next in previous) continue;
             if (allowed && !allowed.has(next) && next !== to) continue;
             previous[next] = node;
@@ -537,20 +604,12 @@ function startNewRound() {
     showPanels();
     hideTip();
 
-    const candidates = Object.keys(graph).filter((id) => graph[id].length > 0);
-    for (let attempt = 0; attempt < 500; attempt++) {
-        const from = candidates[Math.floor(Math.random() * candidates.length)];
-        const dist = distancesFrom(from);
-        const targets = Object.keys(dist).filter((id) => dist[id] >= MIN_DISTANCE && dist[id] <= MAX_DISTANCE);
-        if (targets.length > 0) {
-            startId = from;
-            endId = targets[Math.floor(Math.random() * targets.length)];
-            minPath = dist[endId] - 1;            // países que ficam ENTRE a origem e o destino
-            maxGuesses = minPath + EXTRA_GUESSES;
-            break;
-        }
-    }
-    idealPath = shortestPath(startId, endId);       // para mostrar no final
+    const [from, to, distance] = pickRoute();
+    startId = from;
+    endId = to;
+    minPath = distance - 1;                   // países que ficam ENTRE a origem e o destino
+    maxGuesses = minPath + EXTRA_GUESSES;
+    idealPath = shortestPath(startId, endId, null, true);   // para mostrar no final (uma das menores, sorteada)
 
     inputEl.value = '';
     inputEl.disabled = false;
