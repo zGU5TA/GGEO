@@ -35,11 +35,18 @@
 <body>
 
     <main class="container rotas">
-        <!-- BOTÕES DO TOPO -->
+        <!-- BARRA DO TOPO: voltar, nome do jogo e descrição ao lado dos botões -->
+        <div class="topbar">
+            <div class="topbar-title">
+                <a class="back-platform" href="../../index.html">← GGEO</a>
+                <h1 data-i18n="rotas.title">Rotas</h1>
+                <p class="subtitle" data-i18n="rotas.subtitle">[ Jogo de Rotas entre Países ]</p>
+            </div>
         <div class="top-controls">
             <div class="lang-picker"><span aria-hidden="true">🌐</span><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
             <button class="icon-btn" id="theme-toggle" data-theme-toggle>🌙</button>
             <button class="icon-btn" id="settings-btn" aria-expanded="false" aria-controls="settings-modal" data-i18n-attr="title:settings.title; aria-label:settings.title" title="Configurações" aria-label="Configurações">⚙️</button>
+        </div>
         </div>
 
         <!-- CONFIGURAÇÕES -->
@@ -53,12 +60,6 @@
             </select>
             <label class="check-row"><input type="checkbox" data-sound-toggle checked> <span data-i18n="settings.sound">Efeitos sonoros</span></label>
         </div>
-
-        <header class="rotas-header">
-            <a class="back-platform" href="../../index.html">← GGEO</a>
-            <h1 data-i18n="rotas.title">Rotas</h1>
-            <p class="subtitle" data-i18n="rotas.subtitle">[ Jogo de Rotas entre Países ]</p>
-        </header>
 
         <div class="rotas-layout">
             <!-- Origem e destino -->

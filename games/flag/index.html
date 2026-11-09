@@ -34,11 +34,17 @@
 <body>
 
     <div class="container">
-        <!-- BOTÕES DO TOPO -->
+        <!-- BARRA DO TOPO: voltar e nome do jogo ao lado dos botões -->
+        <div class="topbar">
+            <div class="topbar-title">
+                <a class="back-platform" href="../../index.html">← GGEO</a>
+                <h1>Flag</h1>
+            </div>
         <div class="top-controls">
             <div class="lang-picker"><span aria-hidden="true">🌐</span><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
             <button class="icon-btn" id="theme-toggle" data-theme-toggle>🌙</button>
             <button class="icon-btn" id="settings-btn" data-i18n-attr="title:settings.title; aria-label:settings.title" title="Configurações" aria-label="Configurações">⚙️</button>
+        </div>
         </div>
 
         <!-- MODAL DE CONFIGURAÇÕES -->
@@ -55,8 +61,6 @@
 
         <!-- MENU INICIAL -->
         <div id="menu-screen">
-            <a class="back-platform" href="../../index.html">← GGEO</a>
-            <h1>Flag</h1>
             <p class="subtitle" data-i18n="flag.subtitle">[ Jogo de Adivinhação de Bandeiras ]</p>
 
             <div class="menu-section">
@@ -87,7 +91,6 @@
 
         <!-- TELA DO JOGO -->
         <div id="game-screen" class="hidden">
-            <h1>Flag</h1>
             <div class="stats-container">
                 <div><span data-i18n="flag.score">Acertos:</span> <span id="score">0</span></div>
                 <div><span data-i18n="flag.record">Recorde:</span> <span id="record">0</span></div>

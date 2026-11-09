@@ -239,3 +239,39 @@ p.subtitle {
     margin: 0;
     accent-color: var(--accent);
 }
+
+/* ---------- Barra do topo (todos os jogos): voltar + nome + descrição | botões ---------- */
+
+.topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.topbar-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 1rem;
+    min-width: 0;
+    text-align: left;
+}
+
+.topbar-title h1 { margin: 0; font-size: 1.6em; }
+.topbar-title .back-platform { margin: 0; }
+.topbar-title .subtitle { margin: 0; }
+
+.topbar .top-controls {
+    margin: 0;
+    flex-wrap: nowrap;
+    margin-left: auto;
+}
+
+/* Celular: botões em cima (como antes) e o título embaixo, centralizado */
+@media (max-width: 640px) {
+    .topbar .top-controls { order: -1; width: 100%; justify-content: flex-end; }
+    .topbar-title { width: 100%; justify-content: center; text-align: center; }
+}
