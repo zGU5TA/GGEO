@@ -109,7 +109,11 @@ export function createAutocomplete({ input, list, getEntries, isExcluded = () =>
         else if (event.key === 'Escape') { close(); }
         else if (event.key === 'Enter') {
             event.preventDefault();
-            if (isOpen() && ids.length > 0) choose(active >= 0 ? active : 0);
+            // Nome digitado por inteiro (mesmo que o país esteja escondido da lista, como a
+            // origem no Rotas) vale por si só: não troca "Niger" pela primeira sugestão, "Nigeria".
+            const typed = normalize(input.value.trim());
+            const typedExactly = active < 0 && typed !== '' && getEntries().some((entry) => entry.keys.includes(typed));
+            if (isOpen() && ids.length > 0 && !typedExactly) choose(active >= 0 ? active : 0);
             else onEnter();
         }
     });
