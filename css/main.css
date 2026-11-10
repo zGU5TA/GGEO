@@ -55,6 +55,15 @@
     box-sizing: border-box;
 }
 
+/* Telas grandes (2K, 4K, ultrawide): tudo no site é medido em rem, então basta
+   aumentar o tamanho-base para o site inteiro crescer junto. Até 1920×1080 nada
+   muda (continua o tamanho padrão do navegador, que respeita a preferência da
+   pessoa); acima disso cresce na proporção da tela, limitado pela largura e
+   pela altura para o jogo continuar cabendo. */
+html {
+    font-size: max(100%, min(calc(100vw / 120), calc(100vh / 67.5)));
+}
+
 body {
     margin: 0;
     background-color: var(--bg);

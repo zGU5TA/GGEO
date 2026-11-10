@@ -36,7 +36,7 @@ body {
     border-radius: 0;
     border: 2px solid var(--border);
     width: 100%;
-    max-width: 500px;
+    max-width: 31.25rem;
     text-align: center;
     position: relative;
     box-sizing: border-box;
@@ -52,7 +52,7 @@ body {
 }
 
 .top-controls .lang-picker {
-    height: 36px;
+    height: 2.25rem;
     min-height: 0;
     background: var(--surface-2);
 }
@@ -75,8 +75,8 @@ body {
     background: var(--surface-2);
     border: 1px solid var(--border);
     color: var(--fg);
-    width: 36px;
-    height: 36px;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 0;
     display: flex;
     justify-content: center;
@@ -101,7 +101,7 @@ body {
     padding: 1rem;
     z-index: 10;
     text-align: left;
-    width: 210px;
+    width: 13.125rem;
 }
 
 .settings-modal.active {

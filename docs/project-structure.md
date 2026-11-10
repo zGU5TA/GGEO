@@ -195,3 +195,11 @@ O código do Flagle foi preservado. As mudanças foram:
   constitucional e sede do governo) e Israel como "Jerusalém", que não é
   reconhecida como capital por todos os países. O jogo só usa a capital como
   dica, mas vale decidir o critério para os futuros jogos de capitais.
+
+## Telas grandes (2K, 4K, ultrawide)
+
+`css/main.css` define o tamanho-base (`html { font-size }`) como o maior entre o
+padrão do navegador e `min(largura/120, altura/67,5)`. Até 1920×1080 nada muda;
+acima disso o site inteiro cresce na proporção da tela. Isso só funciona porque
+os tamanhos são em `rem`: ao criar CSS novo, evite `px` para larguras, alturas e
+fontes (bordas finas de 1 a 2 px podem ficar em `px`).

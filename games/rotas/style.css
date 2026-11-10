@@ -25,7 +25,7 @@ body {
 }
 
 .container.rotas {
-    max-width: 980px;
+    max-width: 61.25rem;
     text-align: left;
 }
 
@@ -46,7 +46,7 @@ body {
 
 @media (min-width: 820px) {
     .rotas-layout {
-        grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
+        grid-template-columns: minmax(17.5rem, 25rem) minmax(0, 1fr);
         grid-template-rows: auto auto auto minmax(0, 1fr) auto;
         grid-template-areas:
             "route   route"
@@ -203,7 +203,7 @@ body {
 .globe-wrap {
     position: relative;
     width: 100%;
-    max-width: 540px;
+    max-width: 33.75rem;
     aspect-ratio: 1;
     margin-inline: auto;
     align-self: start;
