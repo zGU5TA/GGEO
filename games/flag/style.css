@@ -150,3 +150,74 @@
     animation: shake 0.3s ease-in-out;
     border-color: var(--error) !important;
 }
+
+/* ---------- Modos de jogo ---------- */
+
+.mode-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.9rem;
+}
+
+.mode-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.25rem;
+    font: inherit;
+    font-weight: bold;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.mode-tab:hover { color: var(--fg); border-color: var(--fg); }
+
+.mode-tab[aria-pressed="true"] {
+    color: var(--on-accent, #000);
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.mode-desc {
+    margin: 0 0 0.9rem;
+    font-size: 0.85em;
+    color: var(--muted);
+    text-align: left;
+}
+
+.daily-status {
+    margin: 0 0 1rem;
+    font-weight: bold;
+    font-size: 0.9em;
+    text-align: left;
+}
+
+.daily-status:empty { display: none; }
+
+/* ---------- Fim do Desafio diário / Rush ---------- */
+
+.end-panel {
+    text-align: center;
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+}
+
+.end-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.end-text { margin: 0 0 0.5rem; font-weight: bold; }
+.end-extra { margin: 0 0 0.75rem; font-size: 0.85em; color: var(--muted); }
+.end-extra:empty { display: none; }
+.share-status { margin: 0.5rem 0 0; font-size: 0.85em; color: var(--muted); min-height: 1.2em; }
+
+/* Textos longos de botão (dica) quebram em duas linhas em vez de alargar a tela */
+#hint-btn { white-space: normal; }

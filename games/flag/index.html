@@ -63,7 +63,16 @@
         <div id="menu-screen">
             <p class="subtitle" data-i18n="flag.subtitle">[ Jogo de Adivinhação de Bandeiras ]</p>
 
-            <div class="menu-section">
+            <!-- Modos: Desafio diário (padrão), Clássico e Rush -->
+            <div class="mode-tabs" role="group" data-i18n-attr="aria-label:flag.mode" aria-label="Modo de jogo">
+                <button type="button" class="mode-tab" data-mode="daily" aria-pressed="true" data-i18n="flag.mode.daily">Diário</button>
+                <button type="button" class="mode-tab" data-mode="classic" aria-pressed="false" data-i18n="flag.mode.classic">Clássico</button>
+                <button type="button" class="mode-tab" data-mode="rush" aria-pressed="false" data-i18n="flag.mode.rush">Rush</button>
+            </div>
+            <p id="mode-desc" class="mode-desc" data-i18n="flag.daily.desc"></p>
+            <p id="daily-status" class="daily-status"></p>
+
+            <div class="menu-section" id="region-section">
                 <label for="continent-select" data-i18n="flag.region">Região:</label>
                 <select id="continent-select">
                     <option value="all" data-i18n="flag.region.all">🌐 Mundo Todo</option>
@@ -75,7 +84,7 @@
                 </select>
             </div>
 
-            <div class="menu-section">
+            <div class="menu-section" id="difficulty-section">
                 <label for="difficulty-select" data-i18n="flag.difficulty">Dificuldade (Tempo):</label>
                 <select id="difficulty-select">
                     <option value="30" data-i18n="flag.difficulty.30">Fácil (30 segundos)</option>
@@ -92,14 +101,15 @@
         <!-- TELA DO JOGO -->
         <div id="game-screen" class="hidden">
             <div class="stats-container">
-                <div><span data-i18n="flag.score">Acertos:</span> <span id="score">0</span></div>
-                <div><span data-i18n="flag.record">Recorde:</span> <span id="record">0</span></div>
+                <div><span id="stat1-label" data-i18n="flag.score">Acertos:</span> <span id="score">0</span></div>
+                <div><span id="stat2-label" data-i18n="flag.record">Recorde:</span> <span id="record">0</span></div>
+                <div id="stat-time" class="hidden"><span data-i18n="flag.stat.time">Tempo:</span> <span id="time-left">60</span></div>
             </div>
 
             <div id="timer-container" class="timer-bar-container">
                 <div id="timer-bar" class="timer-bar"></div>
             </div>
-        
+
             <div class="flag-container">
                 <span id="loader" class="loader">Carregando bandeira...</span>
                 <img id="flag-img" src="" data-i18n-attr="alt:flag.flagAlt" alt="Bandeira misteriosa" style="display: none;">
@@ -116,10 +126,21 @@
                     </div>
                     <button class="btn-primary" id="guess-btn" style="width: auto; margin-top:0;" data-i18n="flag.send">Enviar</button>
                 </div>
+                <button class="secondary-btn hidden" id="skip-btn" data-i18n="flag.skip">Pular</button>
             </div>
 
             <div id="message" class="message" role="status" aria-live="polite"></div>
             <button class="btn-primary" id="next-btn" data-i18n="flag.next">Próxima Bandeira</button>
+
+            <!-- Fim do Desafio diário / do Rush -->
+            <section id="end-panel" class="end-panel hidden" aria-live="polite">
+                <h2 id="end-title" class="end-title"></h2>
+                <p id="end-text" class="end-text"></p>
+                <p id="end-extra" class="end-extra"></p>
+                <button class="btn-primary hidden" id="end-again-btn" data-i18n="flag.rush.playAgain">Jogar novamente</button>
+                <button class="secondary-btn" id="share-btn" data-i18n="share.button">Compartilhar resultado</button>
+                <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
+            </section>
 
             <button class="back-menu-btn" id="back-btn" data-i18n="flag.backToMenu">← Voltar ao Menu</button>
         </div>
