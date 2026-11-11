@@ -19,6 +19,7 @@ import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
 import { countryName, acceptedAnswers, normalize } from '../../js/country-names.js';
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
+import { copyText, siteUrl } from '../../js/share.js';
 
 const BORDERS_URL = new URL('../../data/world-borders.json', import.meta.url);
 const MAP_URL = new URL('../../data/world-map.json', import.meta.url);
@@ -546,23 +547,12 @@ function shareText() {
         t('rotas.res.shareHeader', { from: nameOf[startId], to: nameOf[endId] }),
         guesses.map((id) => square[guessStates[id]]).join(''),
         t('rotas.res.shareLine', { n: guesses.length, ideal: minPath }),
-        new URL('../../', location.href).href,
+        siteUrl(),
     ].join('\n');
 }
 
 async function shareResult() {
-    const text = shareText();
-    try {
-        await navigator.clipboard.writeText(text);
-    } catch (error) {
-        // sem permissão de área de transferência: usa o método antigo
-        const box = document.createElement('textarea');
-        box.value = text;
-        document.body.append(box);
-        box.select();
-        document.execCommand('copy');
-        box.remove();
-    }
+    await copyText(shareText());
     playSound('click');
     copied = true;
     renderResult();

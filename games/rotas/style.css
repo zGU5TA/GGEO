@@ -287,19 +287,6 @@ body {
 .ideal-route { margin: 0 0 0.9rem; font-weight: bold; overflow-wrap: anywhere; }
 .result .btn-primary { margin-top: 0.5rem; padding-block: 1rem; font-size: 1.05em; }
 
-.secondary-btn {
-    width: 100%;
-    margin-top: 0.5rem;
-    padding: 0.7rem;
-    font: inherit;
-    font-weight: bold;
-    color: var(--fg);
-    background: transparent;
-    border: 1px solid var(--border);
-    cursor: pointer;
-}
-.secondary-btn:hover { border-color: var(--fg); }
-
 @media (max-width: 480px) {
     .container.rotas { padding: 1rem; }
 }

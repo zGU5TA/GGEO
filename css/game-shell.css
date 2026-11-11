@@ -26,6 +26,12 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: 100dvh;      /* celular: descontar a barra do navegador */
+    box-sizing: border-box;
+    /* Margem em volta do cartão: telas de celular têm cantos arredondados/curvos
+       e o cartão colado na borda era cortado. O env() respeita recortes (notch). */
+    padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+             max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
     font-size: var(--base-font-size);
     transition: background-color 0.2s, color 0.2s;
 }
@@ -274,4 +280,28 @@ p.subtitle {
 @media (max-width: 640px) {
     .topbar .top-controls { order: -1; width: 100%; justify-content: flex-end; }
     .topbar-title { width: 100%; justify-content: center; text-align: center; }
+}
+
+/* Celular estreito: cartão com menos "respiro" interno para sobrar espaço ao conteúdo */
+@media (max-width: 480px) {
+    .container { padding: 1.25rem; }
+}
+
+/* ---------- Botão secundário (compartilhar, etc.) ---------- */
+
+.secondary-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.7rem;
+    font: inherit;
+    font-weight: bold;
+    color: var(--fg);
+    background: transparent;
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+.secondary-btn:hover { border-color: var(--fg); }
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
 }
