@@ -84,6 +84,24 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   `<select data-font-select>`. A preferência vale para todos os jogos
   (`ggeo_font`); a antiga do Flag (`ggeo_flag_font`) é copiada uma vez.
 
+### Flag: modos de jogo
+
+- **Diário (padrão):** uma bandeira por dia, igual para todos, 3 tentativas, dica
+  opcional (aparece como 💡 no resultado compartilhado). A bandeira do dia sai
+  de uma ordem embaralhada com semente fixa (`DAILY_SEED`) dos países ordenados
+  por código: percorre todos antes de repetir. **Não mude a semente nem a data
+  `DAILY_FIRST_DAY`**, senão o calendário muda. Acrescentar países ao
+  `countries.json` também muda a ordem dos dias futuros. O dia é o da data local
+  da pessoa (como no Wordle). Há sequência de dias seguidos.
+- **Clássico:** o jogo original (sequência de acertos, tempo por bandeira).
+- **Rush:** 1 minuto; acertar pontua, errar ou pular só passa para a próxima
+  (sem perder). O relógio começa quando a primeira bandeira aparece, e a próxima
+  é pré-carregada. Recorde por região (`rush:<região>`).
+- **Sem repetição:** `pickCountry` evita as últimas 20 bandeiras acertadas
+  (`ggeo_flag_recent`, vale para Clássico e Rush, inclusive depois de perder ou
+  recarregar). Em regiões pequenas a janela encolhe para 60% do tamanho.
+- Compartilhar usa `js/share.js` (copia o texto; o Rotas usa o mesmo).
+
 ### Sugestões ao digitar e sons (Flag e Rotas)
 
 - `js/autocomplete.js`: lista de sugestões com mouse, setas ↑ ↓, Enter e Esc,
@@ -161,7 +179,9 @@ dela, então adicionar um jogo não exige mexer em `index.html`.
 | `ggeo_font` | `small`, `medium`, `large` ou `xlarge` | tamanho da fonte, único para todos os jogos |
 | `ggeo_rotas_recent` | objeto `{país: peso}` | memória do sorteio de rotas (pode ser apagada sem problema) |
 | `ggeo_sound` | `off` | só existe se a pessoa desligou os sons (ausente = ligado); vale para todos os jogos |
-| `ggeo_flag_records` | recorde por região do jogo Flag | |
+| `ggeo_flag_records` | recorde por região do jogo Flag | Rush usa chaves `rush:<região>` |
+| `ggeo_flag_recent` | lista das últimas 20 bandeiras acertadas | evita repetição no Clássico e no Rush |
+| `ggeo_flag_daily` | progresso do Desafio diário (dia, tentativas, dica, sequência) | |
 | `ggeo_flag_font` | (antiga) fonte do Flag | só lida uma vez: o valor é copiado para `ggeo_font` |
 
 Quando o jogo se chamava Flagle, as chaves eram `flagle_theme`,

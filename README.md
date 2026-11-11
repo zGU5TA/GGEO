@@ -45,6 +45,7 @@ GGEO/
 │   ├── font.js             tamanho da fonte, preferência única dos jogos
 │   ├── sound.js            efeitos sonoros (e o liga/desliga) compartilhados pelos jogos
 │   ├── autocomplete.js     sugestões de países enquanto digita (Flag e Rotas)
+│   ├── share.js            copiar o resultado para compartilhar (Flag e Rotas)
 │   ├── lang.js             escolhe o idioma antes da página aparecer
 │   ├── i18n.js             carrega os textos e troca o idioma
 │   ├── country-names.js    nomes de países/capitais por idioma e validação das respostas
