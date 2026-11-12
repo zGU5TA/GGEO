@@ -120,9 +120,10 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
 - **Países:** 198 (193 da ONU + Kosovo, Taiwan, Palestina, Saara Ocidental e
   Vaticano). Fronteiras terrestres vêm do projeto *mledoze/countries* (ODbL);
   contornos, do *Natural Earth* (domínio público), simplificados (~480 KB).
-  Só conta o que se anda a pé: sem pontes, túneis ou balsas, e países com
-  pedaços separados (Indonésia, Malásia, Cabinda, Dubrovnik, Palestina) usam
-  `parts` em `world-borders.json` (um nó por pedaço no grafo).
+  Só conta o que se cruza a pé: ponte vale (Dinamarca–Suécia), trem e balsa
+  não (França–Reino Unido). Dentro de um país, qualquer vizinho liga a qualquer
+  outro. O campo opcional `parts` de `world-borders.json` (um nó por pedaço de
+  terra) existe, mas hoje não é usado.
 - **Modo diário:** ao abrir o Rotas, a rota do dia (igual para todos, semente
   fixa + data local, nº 1 em 12/11/2026) aparece primeiro; progresso e
   sequência ficam em `ggeo_rotas_daily`. Ao terminar, o botão leva ao *Modo

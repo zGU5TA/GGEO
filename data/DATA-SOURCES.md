@@ -11,9 +11,12 @@
   a partir do resto do país. Os territórios ultramarinos da França (Guiana
   Francesa, Guadalupe, Martinica, Reunião, Mayotte) e das Antilhas Holandesas
   continuam desenhados no mapa, mas como terra neutra, sem fazer parte do país.
-  Países com pedaços de terra separados (Indonésia, Malásia, Angola/Cabinda,
-  Croácia/Dubrovnik, Palestina) têm o campo `parts`: lista de vizinhos de cada
-  pedaço, e o jogo só deixa atravessar o país entre vizinhos do mesmo pedaço.
+  Regra: duas fronteiras se ligam se dá para cruzar de um país ao outro a pé,
+  inclusive por ponte (Dinamarca–Suécia, Bahrein–Arábia Saudita,
+  Singapura–Malásia). Trem, túnel de trem e balsa não contam
+  (França–Reino Unido). Dentro de um país, vale ir de qualquer vizinho a
+  qualquer outro (ex.: Timor-Leste → Indonésia → Malásia). O campo opcional
+  `parts` (vizinhos por pedaço de terra) existe no código, mas hoje não é usado.
   Novas ligações: Kosovo–(Albânia, Macedônia do Norte, Montenegro, Sérvia),
   Saara Ocidental–(Marrocos, Argélia, Mauritânia), Palestina–(Israel, Jordânia,
   Egito), Vaticano–Itália. Pontes, túneis e balsas (Dinamarca–Suécia,
