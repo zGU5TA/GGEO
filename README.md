@@ -60,7 +60,7 @@ GGEO/
 │   └── zh.json             textos em mandarim
 ├── data/
 │   ├── countries.json      países do Flag: nomes, capitais, apelidos
-│   ├── world-borders.json  193 países e suas fronteiras terrestres (Rotas)
+│   ├── world-borders.json  198 países e suas fronteiras terrestres (Rotas)
 │   └── world-map.json      contornos dos países para o globo (Rotas)
 ├── games/
 │   ├── flag/               um jogo = uma pasta independente
@@ -192,5 +192,5 @@ Nada disso está feito, e as decisões de produto são suas:
 - Usar o logotipo oficial (hoje o cabeçalho tem a palavra GGEO em texto) e um
   favicon.
 - Recorde separado por dificuldade (hoje é só por região).
-- Completar a lista de países (hoje 128 de ~195).
+- Completar a lista de países do Flag (hoje 133 de 198).
 - Só depois: contas, ranking, desafios diários, apoio voluntário.

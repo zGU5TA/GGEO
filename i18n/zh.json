@@ -150,5 +150,12 @@
   "flag.share.rushLine": "1 分钟内旗帜数：{n}（{region}）",
   "share.button": "分享结果",
   "share.copied": "结果已复制！",
-  "share.failed": "无法复制。"
+  "share.failed": "无法复制。",
+  "rotas.mode.daily": "每日挑战 #{n}",
+  "rotas.mode.practice": "练习模式",
+  "rotas.practice": "练习模式",
+  "rotas.daily.streak": "连续天数：",
+  "rotas.daily.note": "明天再来挑战新的路线，或者随意练习。",
+  "rotas.res.dailyHeader": "GGEO · 路线每日挑战 #{n}",
+  "rotas.res.dailyFail": "没成功（{n} 次猜测）"
 }

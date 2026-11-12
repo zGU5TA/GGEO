@@ -35,6 +35,11 @@ const EXTRA_GUESSES = 10;    // palpites permitidos além do mínimo necessário
 const RECENT_KEY = 'ggeo_rotas_recent';
 const RECENT_DECAY = 0.95;   // quanto da memória sobra a cada rodada
 const RECENT_PENALTY = 0.8;  // quanto cada aparição recente reduz a chance (maior = mais variedade)
+// Desafio diário: a mesma rota para todo mundo no dia (sorteada com semente fixa, pelo
+// calendário local). Não mude DAILY_SEED nem DAILY_FIRST_DAY, senão muda o calendário.
+const DAILY_KEY = 'ggeo_rotas_daily';
+const DAILY_FIRST_DAY = '2026-11-12';   // data do desafio nº 1
+const DAILY_SEED = 0x3c6ef372;
 const MAP_SIZE = 480;        // tamanho "virtual" do desenho; o CSS ajusta à tela
 const MIN_SCALE = 50;
 const MAX_SCALE = 2000;
@@ -61,7 +66,13 @@ const settingsBtn = $('settings-btn');
 const settingsModal = $('settings-modal');
 
 // ---------- Dados ----------
-let graph = {};            // id (ISO alfa-3) -> ids vizinhos
+let graph = {};            // id (ISO alfa-3) -> ids vizinhos (usado nas dicas)
+// Grafo de "pedaços de terra": um país com partes separadas (Indonésia, Malásia,
+// Angola/Cabinda, Croácia/Dubrovnik, Palestina) vira um nó por pedaço, e só se
+// atravessa o país entre vizinhos do MESMO pedaço. Sem isso, dava para "andar"
+// da Tailândia à Indonésia pela Malásia, o que não existe por terra.
+let nodes = {};            // nó ('IDN#0') -> { country, next: [nós] }
+let nodesOf = {};          // id -> seus nós
 let countries = {};        // id -> objeto de país (o mesmo formato do Flag)
 let features = [];         // contornos
 let ready = false;
@@ -84,6 +95,8 @@ let idealPath = [];
 let statusState = null;    // { key, id?, state? }
 let yourPath = [];         // caminho montado pelos palpites (só na vitória)
 let copied = false;        // mostrou "resultado copiado"?
+let mode = 'daily';        // 'daily' (rota do dia) | 'practice' (treino infinito)
+let daily = null;          // { date, guesses, hints, ended, streak, lastWin }
 let svg, projection, pathGenerator;
 
 // ================= Carregamento =================
@@ -108,6 +121,30 @@ async function loadData() {
         };
     }
     features = map.features;
+    buildNodes(borders);
+}
+
+// Cada item de world-borders.json pode ter `parts`: listas de vizinhos por pedaço de terra.
+function buildNodes(borders) {
+    const byId = Object.fromEntries(borders.map((item) => [item.id, item]));
+    const groupsOf = (item) => item.parts || [item.borders];
+    nodes = {};
+    nodesOf = {};
+    for (const item of borders) {
+        nodesOf[item.id] = groupsOf(item).map((_, k) => `${item.id}#${k}`);
+        for (const node of nodesOf[item.id]) nodes[node] = { country: item.id, next: [] };
+    }
+    for (const item of borders) {
+        groupsOf(item).forEach((group, k) => {
+            for (const neighborId of group) {
+                const neighbor = byId[neighborId];
+                if (!neighbor) continue;
+                groupsOf(neighbor).forEach((otherGroup, h) => {
+                    if (otherGroup.includes(item.id)) nodes[`${item.id}#${k}`].next.push(`${neighborId}#${h}`);
+                });
+            }
+        });
+    }
 }
 
 // ================= Nomes e busca (idioma atual) =================
@@ -129,13 +166,25 @@ function buildNames() {
 
 // ================= Grafo =================
 
-function distancesFrom(source) {
-    const dist = { [source]: 0 };
-    const queue = [source];
+// Distância (em fronteiras) de um país até cada NÓ; a origem vale todos os seus pedaços.
+function nodeDistances(source) {
+    const dist = {};
+    const queue = [...nodesOf[source]];
+    for (const node of queue) dist[node] = 0;
     for (let i = 0; i < queue.length; i++) {
-        for (const next of graph[queue[i]] || []) {
+        for (const next of nodes[queue[i]].next) {
             if (!(next in dist)) { dist[next] = dist[queue[i]] + 1; queue.push(next); }
         }
+    }
+    return dist;
+}
+
+// Distância de um país até cada outro país (o menor entre os pedaços dele).
+function distancesFrom(source) {
+    const dist = {};
+    for (const [node, d] of Object.entries(nodeDistances(source))) {
+        const id = nodes[node].country;
+        if (!(id in dist) || d < dist[id]) dist[id] = d;
     }
     return dist;
 }
@@ -154,14 +203,16 @@ function shuffled(list) {
 let routePairs = null;
 function buildRoutePairs() {
     const ids = Object.keys(graph).filter((id) => graph[id].length > 0);
+    const byNode = {};
     const dist = {};
-    for (const id of ids) dist[id] = distancesFrom(id);
+    for (const id of ids) { byNode[id] = nodeDistances(id); dist[id] = distancesFrom(id); }
     routePairs = [];
     for (const a of ids) {
         for (const b of ids) {
             const d = dist[a][b];
             if (a >= b || d === undefined || d < MIN_DISTANCE || d > MAX_DISTANCE) continue;
-            const middle = ids.filter((x) => x !== a && x !== b && dist[a][x] + dist[x][b] === d);
+            const middle = ids.filter((x) => x !== a && x !== b
+                && nodesOf[x].some((n) => byNode[a][n] + byNode[b][n] === d));
             routePairs.push({ a, b, d, members: [a, b, ...middle] });
         }
     }
@@ -200,20 +251,23 @@ function pickRoute() {
 }
 
 // Menor caminho de `from` até `to`, passando só por `allowed` (se informado).
+// Devolve a lista de países (ou null se não houver).
 function shortestPath(from, to, allowed = null, randomize = false) {
-    const previous = { [from]: null };
-    const queue = [from];
+    const previous = {};
+    const queue = [];
+    for (const node of nodesOf[from]) { previous[node] = null; queue.push(node); }
     for (let i = 0; i < queue.length; i++) {
         const node = queue[i];
-        if (node === to) {
+        if (nodes[node].country === to) {
             const path = [];
-            for (let at = to; at !== null; at = previous[at]) path.unshift(at);
+            for (let at = node; at !== null; at = previous[at]) path.unshift(nodes[at].country);
             return path;
         }
-        const neighbors = graph[node] || [];
+        const neighbors = nodes[node].next;
         for (const next of randomize ? shuffled(neighbors) : neighbors) {
             if (next in previous) continue;
-            if (allowed && !allowed.has(next) && next !== to) continue;
+            const country = nodes[next].country;
+            if (allowed && !allowed.has(country) && country !== to) continue;
             previous[next] = node;
             queue.push(next);
         }
@@ -222,26 +276,24 @@ function shortestPath(from, to, allowed = null, randomize = false) {
 }
 
 function evaluateGuesses() {
-    const fromStart = distancesFrom(startId);
-    const toEnd = distancesFrom(endId);
-    const best = fromStart[endId];
+    const fromStart = nodeDistances(startId);
+    const toEnd = nodeDistances(endId);
+    const best = Math.min(...nodesOf[endId].map((node) => fromStart[node] ?? Infinity));
 
     // Quais palpites já se ligam à origem (direta ou indiretamente, só por palpites)?
-    const connected = new Set([startId]);
-    let grew = true;
-    while (grew) {
-        grew = false;
-        for (const id of guesses) {
-            if (!connected.has(id) && (graph[id] || []).some((n) => connected.has(n))) {
-                connected.add(id);
-                grew = true;
-            }
+    const allowed = new Set([...guesses, startId]);
+    const reached = new Set(nodesOf[startId]);
+    const queue = [...reached];
+    for (let i = 0; i < queue.length; i++) {
+        for (const next of nodes[queue[i]].next) {
+            if (!reached.has(next) && allowed.has(nodes[next].country)) { reached.add(next); queue.push(next); }
         }
     }
+    const connected = new Set([...reached].map((node) => nodes[node].country));
     guessStates = {};
     for (const id of guesses) {
         if (!connected.has(id)) guessStates[id] = 'gray';
-        else guessStates[id] = fromStart[id] + toEnd[id] === best ? 'green' : 'yellow';
+        else guessStates[id] = nodesOf[id].some((node) => fromStart[node] + toEnd[node] === best) ? 'green' : 'yellow';
     }
 }
 
@@ -438,7 +490,10 @@ function renderRoute() {
     arrow.className = 'arrow';
     arrow.textContent = '→';
     arrow.setAttribute('aria-hidden', 'true');
-    routeEl.append(from, nameOf[startId], arrow, to, nameOf[endId]);
+    const badge = document.createElement('span');
+    badge.className = 'mode-badge';
+    badge.textContent = mode === 'daily' ? t('rotas.mode.daily', { n: dailyNumber(daily.date) }) : t('rotas.mode.practice');
+    routeEl.append(badge, from, nameOf[startId], arrow, to, nameOf[endId]);
     routeEl.setAttribute('aria-label', t('rotas.routeAria', { from: nameOf[startId], to: nameOf[endId] }));
 }
 
@@ -501,8 +556,9 @@ function renderResult() {
     if (!ended) return;
     $('result-title').textContent = t(ended.won ? 'rotas.win.title' : 'rotas.lose.title');
     const text = $('result-text');
-    text.textContent = ended.won ? '' : t('rotas.lose.text');
-    text.classList.toggle('hidden', ended.won);
+    const note = [ended.won ? '' : t('rotas.lose.text'), mode === 'daily' ? t('rotas.daily.note') : ''].filter(Boolean);
+    text.textContent = note.join(' ');
+    text.classList.toggle('hidden', note.length === 0);
 
     const stats = $('result-stats');
     stats.textContent = '';
@@ -511,6 +567,7 @@ function renderResult() {
         const misses = Math.max(0, guesses.length - minPath);
         rows.push(['rotas.win.errors', misses === 0 ? t('rotas.win.perfect') : misses]);
     }
+    if (mode === 'daily') rows.push(['rotas.daily.streak', currentStreak()]);
     for (const [labelKey, value] of rows) {
         const row = document.createElement('div');
         const term = document.createElement('dt');
@@ -536,16 +593,29 @@ function renderResult() {
     $('your-route').textContent = names(yourPath);
     $('ideal-route').textContent = names(idealPath);
 
-    $('share-btn').classList.toggle('hidden', !ended.won);
+    $('share-btn').classList.toggle('hidden', mode !== 'daily' && !ended.won);
+    $('play-again-btn').textContent = t(mode === 'daily' ? 'rotas.practice' : 'rotas.playAgain');
     $('share-status').textContent = copied ? t('rotas.res.copied') : '';
 }
 
 // Texto para colar em conversas: rota, quadradinhos e número de palpites.
 function shareText() {
     const square = { green: '🟩', yellow: '🟨', gray: '⬛' };
+    const marks = guesses.map((id) => square[guessStates[id]]).join('');
+    if (mode === 'daily') {
+        // Sem a rota no texto, para não estragar o desafio de quem ainda não jogou.
+        return [
+            t('rotas.res.dailyHeader', { n: dailyNumber(daily.date) }),
+            marks,
+            ended && ended.won
+                ? t('rotas.res.shareLine', { n: guesses.length, ideal: minPath })
+                : t('rotas.res.dailyFail', { n: guesses.length }),
+            siteUrl(),
+        ].join('\n');
+    }
     return [
         t('rotas.res.shareHeader', { from: nameOf[startId], to: nameOf[endId] }),
-        guesses.map((id) => square[guessStates[id]]).join(''),
+        marks,
         t('rotas.res.shareLine', { n: guesses.length, ideal: minPath }),
         siteUrl(),
     ].join('\n');
@@ -582,7 +652,57 @@ const suggestions = createAutocomplete({
 
 // ================= Rodada =================
 
-function startNewRound() {
+// ---- Desafio diário
+const pad = (n) => String(n).padStart(2, '0');
+const dateKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dayIndex = (key) => { const [y, m, d] = key.split('-').map(Number); return Math.round(Date.UTC(y, m - 1, d) / 86400000); };
+const dailyNumber = (key) => Math.max(1, dayIndex(key) - dayIndex(DAILY_FIRST_DAY) + 1);
+function yesterdayKey(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return dateKey(new Date(y, m - 1, d - 1));
+}
+
+function seededRandom(seed) {
+    let a = seed >>> 0;
+    return () => {
+        a = (a + 0x6D2B79F5) | 0;
+        let x = Math.imul(a ^ (a >>> 15), 1 | a);
+        x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+        return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+// A rota do dia: a lista de pares é a mesma em todo aparelho, então a semente do dia escolhe igual.
+function dailyRoute(key) {
+    if (!routePairs) buildRoutePairs();
+    const random = seededRandom((DAILY_SEED + dailyNumber(key) * 0x9E3779B1) >>> 0);
+    random();   // a primeira saída de uma semente sequencial é pouco espalhada
+    const pair = routePairs[Math.floor(random() * routePairs.length)];
+    return random() < 0.5 ? [pair.a, pair.b, pair.d] : [pair.b, pair.a, pair.d];
+}
+
+function loadDaily() {
+    const today = dateKey();
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(DAILY_KEY)) || {}; } catch (error) { saved = {}; }
+    const base = { streak: saved.streak || 0, lastWin: saved.lastWin || null };
+    if (saved.date === today && Array.isArray(saved.guesses)) {
+        return { ...base, date: today, guesses: saved.guesses, hints: saved.hints || 0, ended: saved.ended || null };
+    }
+    return { ...base, date: today, guesses: [], hints: 0, ended: null };
+}
+
+function saveDaily() {
+    try { localStorage.setItem(DAILY_KEY, JSON.stringify(daily)); } catch (error) { /* sem persistência */ }
+}
+
+function currentStreak() {
+    const today = dateKey();
+    return daily && (daily.lastWin === today || daily.lastWin === yesterdayKey(today)) ? daily.streak : 0;
+}
+
+// ---- Rodadas
+function resetRound() {
     guesses = [];
     guessStates = {};
     hintsUsed = 0;
@@ -591,24 +711,51 @@ function startNewRound() {
     statusState = null;
     yourPath = [];
     copied = false;
-    showPanels();
     hideTip();
+}
 
-    const [from, to, distance] = pickRoute();
+function applyRoute([from, to, distance]) {
     startId = from;
     endId = to;
     minPath = distance - 1;                   // países que ficam ENTRE a origem e o destino
     maxGuesses = minPath + EXTRA_GUESSES;
     idealPath = shortestPath(startId, endId, null, true);   // para mostrar no final (uma das menores, sorteada)
+}
 
+function renderRound() {
+    showPanels();
     inputEl.value = '';
-    inputEl.disabled = false;
-    guessBtn.disabled = false;
+    inputEl.disabled = !!ended;
+    guessBtn.disabled = !!ended;
     suggestions.close();
     renderAll();
     drawMap();
     focusOnRoute();
-    inputEl.focus({ preventScroll: true });
+    if (!ended) inputEl.focus({ preventScroll: true });
+}
+
+function startPractice() {
+    mode = 'practice';
+    resetRound();
+    applyRoute(pickRoute());
+    renderRound();
+}
+
+// Abre o desafio de hoje, retomando palpites/dicas/resultado se já começou (ou terminou).
+function startDaily() {
+    mode = 'daily';
+    resetRound();
+    daily = loadDaily();
+    applyRoute(dailyRoute(daily.date));
+    guesses = daily.guesses.filter((id) => id in graph);
+    hintsUsed = daily.hints;
+    if (guesses.length) evaluateGuesses();
+    if (daily.ended) {
+        ended = { won: !!daily.ended.won };
+        yourPath = ended.won ? shortestPath(startId, endId, new Set([...guesses, startId])) || [] : [];
+    }
+    saveDaily();
+    renderRound();
 }
 
 function submitGuess(id) {
@@ -633,7 +780,8 @@ function submitGuess(id) {
     renderGuesses();
     renderGuessButton();
     drawMap();
-    if (!checkEnd()) playSound({ green: 'success', yellow: 'detour', gray: 'error' }[guessStates[id]]);
+    if (mode === 'daily') { daily.guesses = [...guesses]; saveDaily(); }
+    if (!checkEnd()) playSound({ green: 'success', yellow: 'detour', gray: 'click' }[guessStates[id]]);
 }
 
 function submitTyped() {
@@ -653,6 +801,7 @@ function checkEnd() {
 
     ended = { won: !!path };
     yourPath = path || [];
+    if (mode === 'daily') finishDaily();
     suggestions.close();
     hideTip();
     showPanels();
@@ -661,6 +810,21 @@ function checkEnd() {
     playSound(ended.won ? 'win' : 'lose');
     $('play-again-btn').focus({ preventScroll: true });
     return true;
+}
+
+function finishDaily() {
+    const today = dateKey();
+    daily.ended = { won: ended.won };
+    daily.guesses = [...guesses];
+    daily.hints = hintsUsed;
+    if (ended.won) {
+        daily.streak = daily.lastWin === yesterdayKey(today) ? daily.streak + 1 : 1;
+        daily.lastWin = today;
+    } else {
+        daily.streak = 0;
+        daily.lastWin = null;
+    }
+    saveDaily();
 }
 
 // Ao acabar a rodada, busca/palpites/dicas dão lugar ao resultado (e o mapa fica livre).
@@ -678,6 +842,7 @@ hintBtns.forEach((button, index) => {
     button.addEventListener('click', () => {
         if (index !== hintsUsed || ended) return;
         hintsUsed++;
+        if (mode === 'daily') { daily.hints = hintsUsed; saveDaily(); }
         playSound('click');
         renderHints();
         drawMap();
@@ -687,7 +852,7 @@ hintBtns.forEach((button, index) => {
 // ================= Eventos =================
 
 guessBtn.addEventListener('click', () => { suggestions.close(); submitTyped(); inputEl.focus(); });
-$('play-again-btn').addEventListener('click', () => { playSound('click'); startNewRound(); });
+$('play-again-btn').addEventListener('click', () => { playSound('click'); startPractice(); });
 $('share-btn').addEventListener('click', shareResult);
 
 // Configurações (tamanho da fonte)
@@ -720,7 +885,7 @@ async function init() {
         initSoundToggle();
         initGlobe();
         ready = true;
-        startNewRound();
+        startDaily();
     } catch (error) {
         console.error(error);
         await initI18n().catch(() => {});

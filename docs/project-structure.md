@@ -117,11 +117,17 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   Aqui tudo é local (`data/world-borders.json`, `data/world-map.json`,
   `js/vendor/d3.min.js`): o jogo não quebra se um desses sites cair, nem
   depende de terceiros para carregar.
-- **Países:** os 193 membros da ONU. Fronteiras terrestres vêm do projeto
-  *mledoze/countries* (ODbL); contornos, do *Natural Earth* (domínio público),
-  simplificados para ~450 KB. Kosovo, Palestina, Taiwan, Saara Ocidental e
-  territórios não são sorteados nem aparecem no globo. O Vaticano ficou de
-  fora. A "fronteira" Índia–Sri Lanka foi removida (é marítima).
+- **Países:** 198 (193 da ONU + Kosovo, Taiwan, Palestina, Saara Ocidental e
+  Vaticano). Fronteiras terrestres vêm do projeto *mledoze/countries* (ODbL);
+  contornos, do *Natural Earth* (domínio público), simplificados (~480 KB).
+  Só conta o que se anda a pé: sem pontes, túneis ou balsas, e países com
+  pedaços separados (Indonésia, Malásia, Cabinda, Dubrovnik, Palestina) usam
+  `parts` em `world-borders.json` (um nó por pedaço no grafo).
+- **Modo diário:** ao abrir o Rotas, a rota do dia (igual para todos, semente
+  fixa + data local, nº 1 em 12/11/2026) aparece primeiro; progresso e
+  sequência ficam em `ggeo_rotas_daily`. Ao terminar, o botão leva ao *Modo
+  treino* (o sorteio infinito com memória). Não altere `DAILY_SEED` nem
+  `DAILY_FIRST_DAY`.
 - **Regras:** origem e destino ficam a 4 a 7 fronteiras de distância; o limite
   de palpites é o mínimo necessário + 10. Verde = numa das menores rotas,
   amarelo = conectado, mas em desvio, cinza = ainda sem ligação com a origem.
@@ -177,6 +183,7 @@ dela, então adicionar um jogo não exige mexer em `index.html`.
 | `ggeo_theme` | `dark` ou `light` | compartilhada por todas as páginas |
 | `ggeo_lang` | `pt`, `en`, `es` ou `zh` | só é gravada quando a pessoa escolhe no seletor |
 | `ggeo_font` | `small`, `medium`, `large` ou `xlarge` | tamanho da fonte, único para todos os jogos |
+| `ggeo_rotas_daily` | `{date, guesses, hints, ended, streak, lastWin}` | rota diária de hoje e sequência |
 | `ggeo_rotas_recent` | objeto `{país: peso}` | memória do sorteio de rotas (pode ser apagada sem problema) |
 | `ggeo_sound` | `off` | só existe se a pessoa desligou os sons (ausente = ligado); vale para todos os jogos |
 | `ggeo_flag_records` | recorde por região do jogo Flag | Rush usa chaves `rush:<região>` |
@@ -210,7 +217,7 @@ O código do Flagle foi preservado. As mudanças foram:
 - Nome definitivo do jogo de bandeiras.
 - Logotipo oficial no cabeçalho e favicon.
 - Recorde por dificuldade, e não só por região.
-- Cobertura de países (128 de ~195).
+- Cobertura de países do Flag (133 de 198).
 - Capitais controversas: a Bolívia aparece como "Sucre / La Paz" (capital
   constitucional e sede do governo) e Israel como "Jerusalém", que não é
   reconhecida como capital por todos os países. O jogo só usa a capital como

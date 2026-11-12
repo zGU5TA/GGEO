@@ -126,5 +126,10 @@
   {"name":"Tonga","code":"to","continent":"Oceania","capital":"Nuku'alofa","capitals":{"zh":"努库阿洛法"},"aliases":["tonga"]},
   {"name":"Vanuatu","code":"vu","continent":"Oceania","capital":"Port Vila","capitals":{"zh":"维拉港"},"aliases":["vanuatu"]},
   {"name":"Ilhas Salomão","code":"sb","continent":"Oceania","capital":"Honiara","capitals":{"zh":"霍尼亚拉"},"aliases":["ilhas salomao","salomao"]},
-  {"name":"Micronésia","code":"fm","continent":"Oceania","capital":"Palikir","capitals":{"zh":"帕利基尔"},"aliases":["micronesia","estados federados da micronesia"],"aliasesByLang":{"en":["federated states of micronesia"],"es":["estados federados de micronesia"],"zh":["密克罗尼西亚联邦"]}}
+  {"name":"Micronésia","code":"fm","continent":"Oceania","capital":"Palikir","capitals":{"zh":"帕利基尔"},"aliases":["micronesia","estados federados da micronesia"],"aliasesByLang":{"en":["federated states of micronesia"],"es":["estados federados de micronesia"],"zh":["密克罗尼西亚联邦"]}},
+  {"name":"Kosovo","code":"xk","continent":"Europe","capital":"Pristina","capitals":{"zh":"普里什蒂纳"},"aliases":["kosovo"]},
+  {"name":"Taiwan","code":"tw","continent":"Asia","capital":"Taipé","capitals":{"en":"Taipei","es":"Taipéi","zh":"台北"},"aliases":["taiwan","formosa"],"aliasesByLang":{"en":["formosa","republic of china"],"es":["formosa"],"zh":["中华民国","台湾"]}},
+  {"name":"Palestina","code":"ps","continent":"Asia","capital":"Ramala","capitals":{"en":"Ramallah","es":"Ramala","zh":"拉姆安拉"},"aliases":["palestina","territorios palestinos","estado da palestina"],"aliasesByLang":{"en":["palestine","state of palestine"],"es":["palestina","estado de palestina"],"zh":["巴勒斯坦"]}},
+  {"name":"Saara Ocidental","code":"eh","continent":"Africa","capital":"El Aaiún","capitals":{"en":"Laayoune","es":"El Aaiún","zh":"阿尤恩"},"aliases":["saara ocidental","sahara ocidental","saara"],"aliasesByLang":{"en":["sahrawi arab democratic republic"],"es":["sahara occidental","sahara"],"zh":["撒哈拉阿拉伯民主共和国"]}},
+  {"name":"Vaticano","code":"va","continent":"Europe","capital":"Cidade do Vaticano","capitals":{"en":"Vatican City","es":"Ciudad del Vaticano","zh":"梵蒂冈城"},"aliases":["vaticano","cidade do vaticano","santa se"],"aliasesByLang":{"en":["vatican","holy see"],"es":["vaticano","santa sede"],"zh":["梵蒂冈","教廷"]}}
 ]

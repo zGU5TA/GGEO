@@ -150,5 +150,12 @@
   "flag.share.rushLine": "Banderas en 1 minuto: {n} ({region})",
   "share.button": "Compartir resultado",
   "share.copied": "¡Resultado copiado!",
-  "share.failed": "No se pudo copiar."
+  "share.failed": "No se pudo copiar.",
+  "rotas.mode.daily": "Desafío diario #{n}",
+  "rotas.mode.practice": "Modo práctica",
+  "rotas.practice": "Modo práctica",
+  "rotas.daily.streak": "Racha diaria:",
+  "rotas.daily.note": "Vuelve mañana para el próximo desafío, o practica todo lo que quieras.",
+  "rotas.res.dailyHeader": "GGEO · Rotas diario #{n}",
+  "rotas.res.dailyFail": "No lo logré ({n} intentos)"
 }

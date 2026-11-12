@@ -150,5 +150,12 @@
   "flag.share.rushLine": "Flags in 1 minute: {n} ({region})",
   "share.button": "Share result",
   "share.copied": "Result copied!",
-  "share.failed": "Couldn't copy."
+  "share.failed": "Couldn't copy.",
+  "rotas.mode.daily": "Daily challenge #{n}",
+  "rotas.mode.practice": "Practice mode",
+  "rotas.practice": "Practice mode",
+  "rotas.daily.streak": "Daily streak:",
+  "rotas.daily.note": "Come back tomorrow for the next challenge, or practice as much as you like.",
+  "rotas.res.dailyHeader": "GGEO · Rotas daily #{n}",
+  "rotas.res.dailyFail": "Didn't make it ({n} guesses)"
 }
