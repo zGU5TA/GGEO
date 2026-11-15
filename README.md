@@ -188,7 +188,7 @@ nas três páginas (`index.html`, `games/flag/index.html`, `games/rotas/index.ht
 e no `sitemap.xml`/`robots.txt`.
 
 Não há segredos no projeto. As bandeiras ficam no próprio site
-(`assets/flags/`, SVG do projeto flag-icons, licença MIT), sem depender de
+(`assets/flags/`, SVG do projeto country-flags, proporção real de cada bandeira), sem depender de
 serviços externos.
 
 ## Testes

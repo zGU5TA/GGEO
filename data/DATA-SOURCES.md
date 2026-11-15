@@ -27,7 +27,6 @@
   foram fundidos ao país de origem, e o resto (Groenlândia etc.) virou terra neutra.
 - `../js/vendor/d3.min.js`: **d3** v7 (licença ISC, ver `d3-LICENSE.txt`).
 
-- `assets/flags/*.svg`: bandeiras do projeto **flag-icons** (lipis, licença MIT,
-  https://github.com/lipis/flag-icons), versão 4x3, uma por país do Flag.
-  A licença está em `assets/flags/LICENSE`. Todas ficam em proporção 4:3
-  (bandeiras quadradas, como Suíça e Vaticano, aparecem esticadas).
+- `assets/flags/*.svg`: bandeiras do projeto **country-flags** (hampusborgos,
+  https://github.com/hampusborgos/country-flags), SVGs de Wikimedia Commons na
+  proporção real de cada bandeira. Bandeiras são de domínio público. Uma por país do Flag.
