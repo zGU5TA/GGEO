@@ -157,5 +157,6 @@
   "rotas.daily.streak": "Racha diaria:",
   "rotas.daily.note": "Vuelve mañana para el próximo desafío, o practica todo lo que quieras.",
   "rotas.res.dailyHeader": "GGEO · Rotas diario #{n}",
-  "rotas.res.dailyFail": "No lo logré ({n} intentos)"
+  "rotas.res.dailyFail": "No lo logré ({n} intentos)",
+  "feedback.link": "Enviar comentarios"
 }

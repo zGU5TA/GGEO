@@ -240,3 +240,12 @@
     color: var(--muted);
     font-size: 0.9rem;
 }
+
+/* ---------- Link de feedback ---------- */
+
+.site-footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}

@@ -157,5 +157,6 @@
   "rotas.daily.streak": "Daily streak:",
   "rotas.daily.note": "Come back tomorrow for the next challenge, or practice as much as you like.",
   "rotas.res.dailyHeader": "GGEO · Rotas daily #{n}",
-  "rotas.res.dailyFail": "Didn't make it ({n} guesses)"
+  "rotas.res.dailyFail": "Didn't make it ({n} guesses)",
+  "feedback.link": "Send feedback"
 }

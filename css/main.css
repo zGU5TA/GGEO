@@ -136,3 +136,21 @@ html.i18n-loading body {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
+
+/* ---------- Link de feedback (home e jogos) ---------- */
+
+.feedback-link {
+    color: var(--muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.feedback-link:hover {
+    color: var(--fg);
+}
+
+.game-feedback {
+    margin: 1rem 0 0;
+    text-align: center;
+    font-size: 0.85em;
+}

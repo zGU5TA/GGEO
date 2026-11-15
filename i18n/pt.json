@@ -157,5 +157,6 @@
   "rotas.daily.streak": "Sequência diária:",
   "rotas.daily.note": "Volte amanhã para o próximo desafio, ou treine à vontade.",
   "rotas.res.dailyHeader": "GGEO · Rotas diário #{n}",
-  "rotas.res.dailyFail": "Não consegui ({n} palpites)"
+  "rotas.res.dailyFail": "Não consegui ({n} palpites)",
+  "feedback.link": "Enviar feedback"
 }

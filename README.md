@@ -52,6 +52,7 @@ GGEO/
 ├── assets/                 favicon, logotipo do globo, imagem de prévia e bandeiras (flags/)
 ├── tools/make-logo.js      gera os SVGs do globo (node tools/make-logo.js)
 ├── tools/add-missing-map.py  acrescentou ao mapa os países que faltavam (uso único)
+├── js/feedback.js          endereço do botão "Enviar feedback" (FEEDBACK_URL)
 ├── sitemap.xml, robots.txt   para os buscadores
 ├── wrangler.jsonc          configuração da publicação na Cloudflare
 ├── .assetsignore           o que NÃO vai ao ar na Cloudflare (docs, tools…)

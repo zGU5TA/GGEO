@@ -157,5 +157,6 @@
   "rotas.daily.streak": "连续天数：",
   "rotas.daily.note": "明天再来挑战新的路线，或者随意练习。",
   "rotas.res.dailyHeader": "GGEO · 路线每日挑战 #{n}",
-  "rotas.res.dailyFail": "没成功（{n} 次猜测）"
+  "rotas.res.dailyFail": "没成功（{n} 次猜测）",
+  "feedback.link": "发送反馈"
 }
