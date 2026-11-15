@@ -1,0 +1,7 @@
+{
+  // Publicação na Cloudflare (Workers com arquivos estáticos). O site é só HTML/CSS/JS,
+  // então não há build: a pasta raiz inteira é servida (menos o que está em .assetsignore).
+  "name": "ggeo",
+  "compatibility_date": "2026-11-15",
+  "assets": { "directory": "./" }
+}
