@@ -1,7 +1,19 @@
-# GGEO — Play the World
+<p align="center">
+  <img src="assets/logo-globe.svg" alt="Logotipo do GGEO: um globo feito de quadradinhos" width="140">
+</p>
+
+<h1 align="center">GGEO — Play the World</h1>
+
+<p align="center">
+  Jogos de geografia para testar o que você sabe sobre países, bandeiras e mapas.<br>
+  <a href="https://ggeo.io"><strong>ggeo.io</strong></a>
+</p>
+
+---
 
 Plataforma de jogos de geografia. Os jogos são gratuitos, rodam no navegador
-(computador, tablet e celular) e vivem todos neste repositório.
+(computador, tablet e celular) e vivem todos neste repositório. Disponível em
+português, inglês, espanhol e mandarim (o idioma é escolhido pelo navegador).
 
 Feito só com **HTML, CSS e JavaScript puro**: sem framework, sem build, sem
 backend. Qualquer hospedagem de arquivos estáticos serve.
@@ -10,10 +22,13 @@ backend. Qualquer hospedagem de arquivos estáticos serve.
 
 | Jogo | Pasta | Estado |
 |------|-------|--------|
-| Flag (adivinhe a bandeira) | `games/flag/` | disponível |
-| Rotas (caminho entre países) | `games/rotas/` | disponível |
+| Flag (adivinhe a bandeira) | `games/flag/` | disponível: desafio diário, clássico e Rush (1 minuto) |
+| Rotas (caminho entre países) | `games/rotas/` | disponível: desafio diário e modo treino infinito |
 
-Os nomes ainda são provisórios.
+- **Flag:** 133 países, com nomes aceitos só no idioma em que se joga.
+- **Rotas:** 198 países; só contam fronteiras que se cruzam a pé (ponte vale,
+  trem e balsa não).
+- Os nomes ainda são provisórios.
 
 ## Rodar no seu computador
 
@@ -34,8 +49,12 @@ VS Code (botão direito em `index.html` → *Open with Live Server*).
 ```text
 GGEO/
 ├── index.html              página inicial (catálogo de jogos)
-├── assets/                 favicon, logotipo do globo e imagem de prévia (Open Graph)
+├── assets/                 favicon, logotipo do globo, imagem de prévia e bandeiras (flags/)
 ├── tools/make-logo.js      gera os SVGs do globo (node tools/make-logo.js)
+├── tools/add-missing-map.py  acrescentou ao mapa os países que faltavam (uso único)
+├── sitemap.xml, robots.txt   para os buscadores
+├── wrangler.jsonc          configuração da publicação na Cloudflare
+├── .assetsignore           o que NÃO vai ao ar na Cloudflare (docs, tools…)
 ├── css/
 │   ├── main.css            paleta, tema claro/escuro e base (todas as páginas)
 │   ├── components.css      cabeçalho, botões e cartões da plataforma
@@ -151,23 +170,22 @@ português, sem acento e em minúsculas) e `aliasesByLang` (o mesmo para `en`,
 
 ## Publicação
 
-O site é só uma pasta de arquivos: não há etapa de build.
+O site é só uma pasta de arquivos: não há etapa de build. Hoje ele está no
+ar em **<https://ggeo.io>**, na Cloudflare, ligado a este repositório: cada
+`git push` na branch `main` publica sozinho em um ou dois minutos.
 
-**GitHub Pages**
+**Cloudflare (como está hoje)**
 
-1. No repositório: *Settings → Pages*.
-2. *Source*: **Deploy from a branch**; branch `main`, pasta `/ (root)`.
-3. Aguarde alguns minutos. O endereço será
-   `https://<usuario>.github.io/GGEO/`.
+- `wrangler.jsonc` diz que o projeto é um site estático servido da raiz, e o
+  `.assetsignore` deixa de fora o que não deve ir ao ar (`docs`, `tools`, `README`).
+- Domínio: aba *Domains* / *Custom domains* do projeto, com `ggeo.io` e `www.ggeo.io`.
 
-**Cloudflare Pages**
+**Outras hospedagens** (GitHub Pages, Cloudflare Pages…) também servem: é só
+apontar para a pasta raiz, sem comando de build.
 
-1. *Workers & Pages → Create → Pages → Connect to Git* e escolha o repositório.
-2. *Build command*: deixe vazio. *Build output directory*: `/` (raiz).
-3. Para domínio próprio, use a aba *Custom domains*.
-
-Os passos acima descrevem os painéis como eu os conheço; os nomes dos menus
-podem mudar um pouco.
+**Ao mudar de endereço**, troque as URLs absolutas de `og:url` e `og:image`
+nas três páginas (`index.html`, `games/flag/index.html`, `games/rotas/index.html`)
+e no `sitemap.xml`/`robots.txt`.
 
 Não há segredos no projeto. As bandeiras ficam no próprio site
 (`assets/flags/`, SVG do projeto flag-icons, licença MIT), sem depender de
@@ -175,23 +193,22 @@ serviços externos.
 
 ## Testes
 
-Ainda não há testes automatizados no repositório. Na construção da base, estes
-pontos foram verificados à mão no **Google Chrome** (celular e desktop, tema
-claro e escuro, e publicação em subpasta): abertura das páginas, navegação
-home ↔ jogo, tema e sua persistência, troca de idioma (pt/en/es/zh), aceitação de nomes de países só no idioma atual e sua
-persistência, cronômetro, validação de respostas,
-dicas, pontuação, recordes, migração dos dados do antigo Flagle, falha ao
-carregar bandeira e console sem erros.
+Ainda não há testes automatizados no repositório. A cada mudança, o fluxo foi
+verificado com scripts de navegador (Playwright, **Google Chrome**) fora do
+repositório: abertura das páginas, navegação, tema, troca de idioma e nomes
+aceitos por idioma, desafio diário e Rush do Flag, desafio diário e treino do
+Rotas, regras de fronteira, persistência, publicação em subpasta e console sem
+erros, em celular e desktop.
 
-**Não testado:** Firefox e Safari. Vale abrir o site neles antes de divulgar.
+**Não testado:** Firefox e Safari. Vale abrir o site neles.
 
 ## Próximos passos possíveis
 
-Nada disso está feito, e as decisões de produto são suas:
+Decisões de produto são suas:
 
 - Escolher o nome definitivo do Flag e do Rotas.
-- Usar o logotipo oficial (hoje o cabeçalho tem a palavra GGEO em texto) e um
-  favicon.
-- Recorde separado por dificuldade (hoje é só por região).
-- Completar a lista de países do Flag (hoje 133 de 198).
-- Só depois: contas, ranking, desafios diários, apoio voluntário.
+- Recorde separado por dificuldade no Flag (hoje é só por região).
+- Completar a lista de países do Flag para todos os 198 (hoje 133).
+- Páginas por idioma (`/en/`, `/es/`, `/zh/`) para os buscadores.
+- Um futuro Rotas com oceanos.
+- Só depois: contas, ranking, apoio voluntário.
