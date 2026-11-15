@@ -169,8 +169,9 @@ O site é só uma pasta de arquivos: não há etapa de build.
 Os passos acima descrevem os painéis como eu os conheço; os nomes dos menus
 podem mudar um pouco.
 
-Não há segredos no projeto. As bandeiras vêm de `flagcdn.com`, então o jogo
-precisa de internet para mostrá-las.
+Não há segredos no projeto. As bandeiras ficam no próprio site
+(`assets/flags/`, SVG do projeto flag-icons, licença MIT), sem depender de
+serviços externos.
 
 ## Testes
 

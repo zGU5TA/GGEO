@@ -195,7 +195,8 @@ const show = (element, visible) => element.classList.toggle('hidden', !visible);
 // Sorteio sem repetir bandeiras acertadas há pouco
 // ---------------------------------------------------------------------------
 
-const flagUrl = (country) => `https://flagcdn.com/w640/${country.code}.png`;
+// Bandeiras locais (SVG do projeto flag-icons, licença MIT) em assets/flags/<código>.svg
+const flagUrl = (country) => new URL(`../../assets/flags/${country.code}.svg`, import.meta.url).href;
 
 function loadRecent() {
     const list = loadJson(STORAGE.recent, []);
