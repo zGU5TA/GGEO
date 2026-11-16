@@ -1,11 +1,13 @@
-// Link "Enviar feedback" (rodapé da home e dos jogos).
-// Para usar um formulário próprio (ex.: Google Forms), basta colar o endereço
-// em FEEDBACK_URL. Enquanto estiver vazio, o link abre uma "issue" no GitHub.
-const FEEDBACK_URL = '';
-const FALLBACK_URL = 'https://github.com/zGU5TA/GGEO/issues/new';
+// Link "Enviar feedback" (rodapé da home e dos jogos): abre o e-mail do jogador
+// para feedback@ggeo.io (encaminhado pela Cloudflare Email Routing).
+// O endereço também aparece escrito ao lado, porque quem usa só webmail pode
+// não ter um programa de e-mail configurado para abrir o link.
+const FEEDBACK_EMAIL = 'feedback@ggeo.io';
 
 for (const link of document.querySelectorAll('[data-feedback]')) {
-    link.href = FEEDBACK_URL || FALLBACK_URL;
-    link.target = '_blank';
-    link.rel = 'noopener';
+    link.href = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent('GGEO — feedback')}`;
+    const address = document.createElement('span');
+    address.className = 'feedback-address';
+    address.textContent = ` · ${FEEDBACK_EMAIL}`;
+    link.after(address);
 }

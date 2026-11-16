@@ -154,3 +154,8 @@ html.i18n-loading body {
     text-align: center;
     font-size: 0.85em;
 }
+
+.feedback-address {
+    color: var(--muted);
+    user-select: all;
+}
