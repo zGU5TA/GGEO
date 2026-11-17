@@ -66,7 +66,7 @@
             <!-- Modos: Desafio diário (padrão), Clássico e Rush -->
             <div class="mode-tabs" role="group" data-i18n-attr="aria-label:flag.mode" aria-label="Modo de jogo">
                 <button type="button" class="mode-tab" data-mode="daily" aria-pressed="true" data-i18n="flag.mode.daily">Diário</button>
-                <button type="button" class="mode-tab" data-mode="classic" aria-pressed="false" data-i18n="flag.mode.classic">Clássico</button>
+                <button type="button" class="mode-tab" data-mode="classic" aria-pressed="false" data-i18n="flag.mode.classic">Treino</button>
                 <button type="button" class="mode-tab" data-mode="rush" aria-pressed="false" data-i18n="flag.mode.rush">Rush</button>
             </div>
             <p id="mode-desc" class="mode-desc" data-i18n="flag.daily.desc"></p>
@@ -113,7 +113,11 @@
             <div class="flag-container">
                 <span id="loader" class="loader">Carregando bandeira...</span>
                 <img id="flag-img" src="" data-i18n-attr="alt:flag.flagAlt" alt="Bandeira misteriosa" style="display: none;">
+                <canvas id="flag-canvas" class="flag-canvas" role="img" data-i18n-attr="aria-label:flag.flagAlt" aria-label="Bandeira misteriosa"></canvas>
             </div>
+
+            <p id="reveal-caption" class="reveal-caption" data-i18n="flag.reveal.caption">Cada palpite revela as partes da bandeira que têm a mesma cor.</p>
+            <ol id="guess-list" class="guess-list" aria-label="Palpites"></ol>
 
             <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn" data-i18n="flag.hintButton">💡 Pedir Dica (-1 Rodada sem bônus)</button>
             <div id="hint-box" class="hint-box" aria-live="polite"></div>
@@ -138,6 +142,8 @@
                 <p id="end-text" class="end-text"></p>
                 <p id="end-extra" class="end-extra"></p>
                 <button class="btn-primary hidden" id="end-again-btn" data-i18n="flag.rush.playAgain">Jogar novamente</button>
+                <button class="btn-primary hidden" id="go-classic-btn" data-i18n="flag.go.classic">Jogar o Treino</button>
+                <button class="btn-primary hidden" id="go-rush-btn" data-i18n="flag.go.rush">Jogar o Rush</button>
                 <button class="secondary-btn" id="share-btn" data-i18n="share.button">Compartilhar resultado</button>
                 <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
             </section>

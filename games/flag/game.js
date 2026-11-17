@@ -3,6 +3,7 @@ import { countryName, capitalName, matchesCountry, acceptedAnswers } from '../..
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
 import { copyText, siteUrl } from '../../js/share.js';
+import { analyzeFlag, overlap, fraction, addMask, drawRevealed, drawFull } from './reveal.js';
 
 // A lista de países fica em data/countries.json, compartilhada entre os jogos.
 // import.meta.url resolve o caminho a partir deste arquivo, então funciona
@@ -15,15 +16,20 @@ let currentCountry = null;
 let score = 0;
 
 // ---- Modos de jogo ----
-//  daily   Desafio diário: uma bandeira por dia (igual para todos), 3 tentativas. É o padrão.
-//  classic Clássico: sequência de acertos, com cronômetro por bandeira (o jogo original).
+//  daily   Desafio diário: uma bandeira por dia (igual para todos), escondida: cada palpite
+//          revela os pedaços que têm cores iguais (ver reveal.js). 7 palpites. É a primeira
+//          coisa que a pessoa vê; só depois de terminar aparecem o Treino e o Rush.
+//  classic Treino: sequência de acertos, com cronômetro por bandeira (o jogo original).
 //  rush    Rush: quantas bandeiras você acerta em 1 minuto; errar não tira pontos nem encerra.
 let mode = 'daily';        // modo escolhido no menu
 let playMode = null;       // modo da partida em andamento (null = no menu)
 
-const DAILY_ATTEMPTS = 3;
+const DAILY_ATTEMPTS = 7;
 const DAILY_FIRST_DAY = '2026-11-11';   // data do desafio nº 1
 const DAILY_SEED = 0x6a09e667;          // fixa: todo mundo embaralha igual (não mude, senão muda o calendário)
+// O desafio diário só sorteia bandeiras bem conhecidas (as do Treino e do Rush usam todas).
+const EASY_CODES = new Set(('ar au at be br ca cl cn co cu cz dk eg fi fr de gr hu in id ie il it jp kr mx nl nz ng no pk pe ph pl pt ru sa za es se ch th tr ua gb us ve vn ' +
+    'bo ec uy py cr pa do jm ht ma dz tn ke et gh sn ao mz ir iq jo lb kw ae qa np lk my sg mn ro bg rs hr sk ee lv lt is cy mt lu mc bs bb tz zw cm sc').split(' '));
 const RUSH_SECONDS = 60;
 const RECENT_FLAGS = 20;    // uma bandeira acertada fica este número de rodadas sem voltar
 
@@ -118,6 +124,12 @@ const endExtra = document.getElementById('end-extra');
 const endAgainBtn = document.getElementById('end-again-btn');
 const shareBtn = document.getElementById('share-btn');
 const shareStatus = document.getElementById('share-status');
+const flagCanvas = document.getElementById('flag-canvas');
+const guessList = document.getElementById('guess-list');
+const revealCaption = document.getElementById('reveal-caption');
+const goClassicBtn = document.getElementById('go-classic-btn');
+const goRushBtn = document.getElementById('go-rush-btn');
+const backBtn = document.getElementById('back-btn');
 
 async function loadCountries() {
     startBtn.disabled = true;
@@ -276,10 +288,11 @@ function loadDaily() {
     const today = dateKey();
     const saved = loadJson(STORAGE.daily, {});
     const base = { streak: saved.streak || 0, lastWin: saved.lastWin || null };
-    if (saved.date === today && Array.isArray(saved.results)) {
-        return { ...base, date: today, results: saved.results, done: !!saved.done, won: !!saved.won, hint: !!saved.hint };
+    // (O formato antigo, com `results` em vez de `guesses`, vale como "ainda não jogou hoje".)
+    if (saved.date === today && Array.isArray(saved.guesses)) {
+        return { ...base, date: today, guesses: saved.guesses, done: !!saved.done, won: !!saved.won, hint: !!saved.hint };
     }
-    return { ...base, date: today, results: [], done: false, won: false, hint: false };
+    return { ...base, date: today, guesses: [], done: false, won: false, hint: false };
 }
 let daily = loadDaily();
 
@@ -304,7 +317,7 @@ function seededRandom(seed) {
 // A bandeira de cada dia: percorre todos os países em ordem embaralhada (fixa),
 // então não repete antes de passar por todos.
 function dailyCountry(key) {
-    const list = [...countries].sort((a, b) => (a.code < b.code ? -1 : 1));
+    const list = countries.filter((country) => EASY_CODES.has(country.code)).sort((a, b) => (a.code < b.code ? -1 : 1));
     const random = seededRandom(DAILY_SEED);
     for (let i = list.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
@@ -357,9 +370,16 @@ function setPlayLayout(which) {
     show(hintBtn, which !== 'rush');
     show(skipBtn, which === 'rush');
     show(flagContainer, true);
+    show(flagCanvas, which === 'daily');
+    show(guessList, which === 'daily');
+    show(revealCaption, which === 'daily');
+    show(backBtn, which !== 'daily');       // no diário o botão só aparece quando termina (veja showDailyEnd)
+    if (which === 'daily') { flagImg.style.display = 'none'; loader.style.display = 'none'; }
     show(gameArea, true);
     show(endPanel, false);
     show(endAgainBtn, false);
+    show(goClassicBtn, false);
+    show(goRushBtn, false);
     nextBtn.style.display = "none";
     retryPending = false;
     hintVisible = false;
@@ -388,8 +408,8 @@ function startGame() {
     if (mode === 'rush') startRush(); else startClassic();
 }
 
-function returnToMenu() {
-    playSound('click');
+function returnToMenu(withSound = true) {
+    if (withSound === true) playSound('click');
     clearInterval(timerInterval);
     loadToken++;                 // ignora imagens que ainda estejam chegando
     rush.active = false;
@@ -644,12 +664,93 @@ function endRush() {
 }
 
 // ---------------------------------------------------------------------------
-// Desafio diário
+// Desafio diário (bandeira escondida, revelada pelas cores dos palpites)
 // ---------------------------------------------------------------------------
 
+let board = null;          // { target (análise da bandeira do dia), revealed (máscara), rows: [{ code, percent }] }
+let boardToken = 0;
+
 function renderDailyStats() {
-    scoreSpan.textContent = `${daily.results.length}/${DAILY_ATTEMPTS}`;
+    scoreSpan.textContent = `${daily.guesses.length}/${DAILY_ATTEMPTS}`;
     recordSpan.textContent = currentStreak();
+}
+
+function byCode(code) {
+    return countries.find((country) => country.code === code);
+}
+
+// Lista de palpites: uma linha por tentativa (nome, % revelado, bandeira) e linhas vazias até o limite.
+function renderGuessList() {
+    guessList.textContent = '';
+    const lang = getLang();
+    for (let i = 0; i < DAILY_ATTEMPTS; i++) {
+        const row = document.createElement('li');
+        row.className = 'guess-row';
+        const entry = board && board.rows[i];
+        if (entry) {
+            const country = byCode(entry.code);
+            const name = document.createElement('span');
+            name.className = 'guess-name';
+            name.textContent = countryName(country, lang);
+            const percent = document.createElement('span');
+            percent.className = 'guess-percent';
+            percent.textContent = entry.correct ? '100%' : `${entry.percent.toFixed(1)}%`;
+            const flag = document.createElement('img');
+            flag.className = 'guess-flag';
+            flag.src = flagUrl(country);
+            flag.alt = '';
+            row.append(name, percent, flag);
+            if (entry.correct) row.classList.add('is-correct');
+        } else {
+            row.classList.add('is-empty');
+            row.append(document.createElement('span'), document.createElement('span'), document.createElement('span'));
+        }
+        guessList.append(row);
+    }
+}
+
+// Soma o palpite à revelação e devolve a % que ELE revelou sozinho (0 a 100).
+async function applyGuess(code) {
+    const guessCountry = byCode(code);
+    const guess = await analyzeFlag(flagUrl(guessCountry), { width: board.target.width, height: board.target.height });
+    const result = overlap(board.target, guess);
+    addMask(board.revealed, result.mask);
+    const percent = fraction(board.target, result.count) * 100;
+    board.rows.push({ code, percent, correct: code === currentCountry.code });
+    return percent;
+}
+
+function drawBoard() {
+    if (daily.done) drawFull(flagCanvas, board.target);
+    else drawRevealed(flagCanvas, board.target, board.revealed);
+    renderGuessList();
+    renderDailyStats();
+}
+
+// Prepara a bandeira do dia e refaz o estado salvo (palpites e fim, se já terminou).
+async function loadBoard() {
+    const token = ++boardToken;
+    retryPending = false;
+    nextBtn.style.display = 'none';
+    guessInput.disabled = daily.done;
+    guessBtn.disabled = daily.done;
+    try {
+        const target = await analyzeFlag(flagUrl(currentCountry));
+        if (token !== boardToken) return;
+        board = { target, revealed: new Uint8Array(target.width * target.height), rows: [] };
+        for (const code of daily.guesses) {
+            if (byCode(code)) await applyGuess(code);
+        }
+        if (token !== boardToken) return;
+        flagReady = true;
+        drawBoard();
+        if (daily.done) showDailyEnd(); else guessInput.focus({ preventScroll: true });
+    } catch (error) {
+        console.error('Falha ao carregar a bandeira do dia:', error);
+        flagReady = false;
+        setMessage({ key: 'flag.imageError', country: currentCountry }, 'error');
+        offerRetry('flag.retry');
+    }
 }
 
 function startDaily() {
@@ -662,45 +763,63 @@ function startDaily() {
     hintUsed = daily.hint;
     hintVisible = daily.hint;
     renderHint();
+    board = null;
+    flagReady = false;
     renderDailyStats();
-
-    loadFlag(currentCountry, { onError: () => offerRetry('flag.retry') });
-
-    if (daily.done) {
-        showDailyEnd();
-    } else {
-        guessInput.focus();
-    }
+    renderGuessList();
+    loadBoard();
 }
 
-function dailyGuess() {
+// Descobre qual país o texto digitado nomeia (no idioma atual).
+function findCountry(text) {
+    return countries.find((country) => matchesCountry(text, country)) || null;
+}
+
+async function dailyGuess() {
     const text = guessInput.value;
-    if (daily.done || !flagReady || !text.trim()) return;
+    if (daily.done || !flagReady || !text.trim() || dailyBusy) return;
 
-    if (matchesCountry(text, currentCountry)) {
-        playSound('success');
-        daily.results.push('v');
-        daily.done = true;
-        daily.won = true;
-        finishDaily();
+    const guessed = findCountry(text);
+    if (!guessed) {                                     // não é um país da lista: não gasta tentativa
+        playSound('error');
+        setMessage({ key: 'flag.daily.unknown', country: currentCountry }, 'error');
+        guessInput.classList.add('shake');
+        setTimeout(() => guessInput.classList.remove('shake'), 300);
+        return;
+    }
+    if (daily.guesses.includes(guessed.code)) {         // repetido também não gasta
+        setMessage({ key: 'flag.daily.duplicate', country: guessed }, 'error');
         return;
     }
 
-    playSound('error');
-    daily.results.push('x');
-    guessInput.classList.add('shake');
-    setTimeout(() => guessInput.classList.remove('shake'), 300);
-    if (daily.results.length >= DAILY_ATTEMPTS) {
-        daily.done = true;
-        daily.won = false;
-        finishDaily();
-        return;
+    dailyBusy = true;
+    try {
+        daily.guesses.push(guessed.code);
+        await applyGuess(guessed.code);
+        guessInput.value = '';
+        suggestions.close();
+        if (guessed.code === currentCountry.code) {
+            daily.done = true;
+            daily.won = true;
+        } else if (daily.guesses.length >= DAILY_ATTEMPTS) {
+            daily.done = true;
+            daily.won = false;
+        }
+        if (daily.done) {
+            drawBoard();
+            finishDaily();
+            return;
+        }
+        playSound('detour');
+        const last = board.rows[board.rows.length - 1];
+        setMessage({ key: 'flag.daily.wrong', country: currentCountry, params: { n: DAILY_ATTEMPTS - daily.guesses.length, p: last.percent.toFixed(1) } }, 'error');
+        saveDaily();
+        drawBoard();
+    } finally {
+        dailyBusy = false;
     }
-    guessInput.value = "";
-    setMessage({ key: 'flag.daily.wrong', country: currentCountry, params: { n: DAILY_ATTEMPTS - daily.results.length } }, 'error');
-    saveDaily();
-    renderDailyStats();
 }
+let dailyBusy = false;
 
 function finishDaily() {
     const today = dateKey();
@@ -721,10 +840,21 @@ function showDailyEnd() {
     guessBtn.disabled = true;
     show(gameArea, false);
     show(hintBtn, false);
+    show(revealCaption, false);
+    show(goClassicBtn, true);
+    show(goRushBtn, true);
+    show(backBtn, true);
     setMessage(null);
     renderEnd();
     show(endPanel, true);
-    shareBtn.focus();
+    shareBtn.focus({ preventScroll: true });
+}
+
+// Depois do diário: Treino e Rush ficam disponíveis no menu.
+function goToMode(next) {
+    playSound('click');
+    mode = next;
+    returnToMenu(false);
 }
 
 // ---------------------------------------------------------------------------
@@ -742,7 +872,7 @@ function renderEnd() {
     const name = countryName(currentCountry, getLang());
     endTitle.textContent = t(daily.won ? 'flag.daily.winTitle' : 'flag.daily.loseTitle');
     endText.textContent = daily.won
-        ? t('flag.daily.win', { name, n: daily.results.length, max: DAILY_ATTEMPTS })
+        ? t('flag.daily.win', { name, n: daily.guesses.length, max: DAILY_ATTEMPTS })
         : t('flag.daily.lose', { name });
     const streak = currentStreak();
     endExtra.textContent = t('flag.daily.comeBack') + (streak > 0 ? ' ' + t('flag.daily.streakLine', { n: streak }) : '');
@@ -753,8 +883,10 @@ function shareText() {
         const region = t(`flag.region.${selectedContinent}`);
         return [t('flag.share.rushHeader'), t('flag.share.rushLine', { n: rush.score, region }), siteUrl()].join('\n');
     }
-    const squares = daily.results.map((r) => (r === 'v' ? '🟩' : '🟥')).join('');
-    const tries = `${daily.won ? daily.results.length : 'X'}/${DAILY_ATTEMPTS}`;
+    // Um quadrado por palpite, do mais longe ao mais perto da bandeira (sem revelar nada do país).
+    const tier = (entry) => (entry.correct ? '🟩' : entry.percent < 10 ? '⬛' : entry.percent < 25 ? '🟥' : entry.percent < 45 ? '🟧' : '🟨');
+    const squares = board.rows.map(tier).join('');
+    const tries = `${daily.won ? daily.guesses.length : 'X'}/${DAILY_ATTEMPTS}`;
     return [
         t('flag.share.dailyHeader', { n: dailyNumber(daily.date) }),
         `${squares} ${tries}${daily.hint ? ' 💡' : ''}`,
@@ -785,14 +917,12 @@ function handleAction() {
 
 function handleRoundAction() {
     playSound('click');
-    if (retryPending) {                      // diário: tenta carregar a MESMA bandeira de novo
-        retryPending = false;
-        nextBtn.style.display = "none";
-        guessInput.disabled = daily.done;
-        guessBtn.disabled = daily.done;
-        loadFlag(currentCountry, { onError: () => offerRetry('flag.retry') });
+    if (retryPending && playMode === 'daily') {   // diário: tenta carregar a MESMA bandeira de novo
+        setMessage(null);
+        loadBoard();
         return;
     }
+    if (retryPending) retryPending = false;
     loadNewCountry();
     guessInput.focus();
 }
@@ -842,7 +972,9 @@ guessBtn.addEventListener('click', handleAction);
 nextBtn.addEventListener('click', handleRoundAction);
 shareBtn.addEventListener('click', shareResult);
 endAgainBtn.addEventListener('click', () => { playSound('click'); startRush(); });
-document.getElementById('back-btn').addEventListener('click', returnToMenu);
+backBtn.addEventListener('click', () => returnToMenu());
+goClassicBtn.addEventListener('click', () => goToMode('classic'));
+goRushBtn.addEventListener('click', () => goToMode('rush'));
 document.getElementById('settings-btn').addEventListener('click', toggleSettings);
 document.getElementById('font-size-select').addEventListener('change', () => playSound('click'));
 for (const tab of document.querySelectorAll('.mode-tab')) {
@@ -854,6 +986,7 @@ onLangChange(() => {
     renderMessage();
     renderHint();
     renderMenu();
+    if (playMode === 'daily' && board) renderGuessList();
     if (!endPanel.classList.contains('hidden')) renderEnd();
     buildSearchEntries();
     suggestions.close();
@@ -864,3 +997,5 @@ await initI18n();
 await loadCountries();
 buildSearchEntries();
 renderMenu();
+// A primeira coisa que a pessoa vê é o desafio diário; o menu (Treino e Rush) vem depois.
+if (countries.length > 0) startDaily();

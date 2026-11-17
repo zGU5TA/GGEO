@@ -86,14 +86,18 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
 
 ### Flag: modos de jogo
 
-- **Diário (padrão):** uma bandeira por dia, igual para todos, 3 tentativas, dica
-  opcional (aparece como 💡 no resultado compartilhado). A bandeira do dia sai
-  de uma ordem embaralhada com semente fixa (`DAILY_SEED`) dos países ordenados
-  por código: percorre todos antes de repetir. **Não mude a semente nem a data
+- **Diário (é a primeira tela do Flag):** uma bandeira escondida por dia, igual
+  para todos, 7 palpites, dica opcional (💡 no compartilhamento). Cada palpite
+  revela os pedaços da bandeira do dia onde a bandeira palpitada tem cor parecida
+  na mesma posição (`reveal.js`); mostra-se a % revelada por palpite. Treino e
+  Rush só aparecem depois de terminar o diário. O compartilhamento usa quadrados
+  por faixa de % (sem spoiler). A bandeira do dia sai de uma ordem embaralhada
+  com semente fixa (`DAILY_SEED`) só dos países conhecidos (`EASY_CODES`),
+  ordenados por código: percorre todos antes de repetir. **Não mude a semente nem a data
   `DAILY_FIRST_DAY`**, senão o calendário muda. Acrescentar países ao
   `countries.json` também muda a ordem dos dias futuros. O dia é o da data local
   da pessoa (como no Wordle). Há sequência de dias seguidos.
-- **Clássico:** o jogo original (sequência de acertos, tempo por bandeira).
+- **Treino (antes "Clássico"):** o jogo original (sequência de acertos, tempo por bandeira).
 - **Rush:** 1 minuto; acertar pontua, errar ou pular só passa para a próxima
   (sem perder). O relógio começa quando a primeira bandeira aparece, e a próxima
   é pré-carregada. Recorde por região (`rush:<região>`).
