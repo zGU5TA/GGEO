@@ -25,7 +25,7 @@ backend. Qualquer hospedagem de arquivos estáticos serve.
 | Flag (adivinhe a bandeira) | `games/flag/` | disponível: desafio diário, clássico e Rush (1 minuto) |
 | Rotas (caminho entre países) | `games/rotas/` | disponível: desafio diário e modo treino infinito |
 
-- **Flag:** 133 países, com nomes aceitos só no idioma em que se joga.
+- **Flag:** 199 países (os 198 do Rotas + Ilhas Faroé), com nomes aceitos só no idioma em que se joga.
 - **Rotas:** 198 países; só contam fronteiras que se cruzam a pé (ponte vale,
   trem e balsa não).
 - Os nomes ainda são provisórios.
@@ -209,7 +209,6 @@ Decisões de produto são suas:
 
 - Escolher o nome definitivo do Flag e do Rotas.
 - Recorde separado por dificuldade no Flag (hoje é só por região).
-- Completar a lista de países do Flag para todos os 198 (hoje 133).
 - Páginas por idioma (`/en/`, `/es/`, `/zh/`) para os buscadores.
 - Um futuro Rotas com oceanos.
 - Só depois: contas, ranking, apoio voluntário.

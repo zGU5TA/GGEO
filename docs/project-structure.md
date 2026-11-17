@@ -222,7 +222,6 @@ O código do Flagle foi preservado. As mudanças foram:
 - Nome definitivo do jogo de bandeiras.
 - Logotipo oficial no cabeçalho e favicon.
 - Recorde por dificuldade, e não só por região.
-- Cobertura de países do Flag (133 de 198).
 - Capitais controversas: a Bolívia aparece como "Sucre / La Paz" (capital
   constitucional e sede do governo) e Israel como "Jerusalém", que não é
   reconhecida como capital por todos os países. O jogo só usa a capital como
