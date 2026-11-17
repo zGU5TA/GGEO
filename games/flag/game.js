@@ -3,7 +3,7 @@ import { countryName, capitalName, matchesCountry, acceptedAnswers } from '../..
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
 import { copyText, siteUrl } from '../../js/share.js';
-import { analyzeFlag, overlap, fraction, addMask, drawRevealed, drawFull } from './reveal.js';
+import { analyzeFlag, overlap, fraction, addMask, drawRevealed, drawFull, animateReveal } from './reveal.js';
 
 // A lista de países fica em data/countries.json, compartilhada entre os jogos.
 // import.meta.url resolve o caminho a partir deste arquivo, então funciona
@@ -21,7 +21,7 @@ let score = 0;
 //          coisa que a pessoa vê; só depois de terminar aparecem o Treino e o Rush.
 //  classic Treino: sequência de acertos, com cronômetro por bandeira (o jogo original).
 //  rush    Rush: quantas bandeiras você acerta em 1 minuto; errar não tira pontos nem encerra.
-let mode = 'daily';        // modo escolhido no menu
+let mode = 'classic';      // modo escolhido no menu (Treino ou Rush; o diário é a página de entrada)
 let playMode = null;       // modo da partida em andamento (null = no menu)
 
 const DAILY_ATTEMPTS = 7;
@@ -106,7 +106,7 @@ const hintBox = document.getElementById('hint-box');
 const startBtn = document.getElementById('start-btn');
 const menuMessage = document.getElementById('menu-message');
 const modeDesc = document.getElementById('mode-desc');
-const dailyStatus = document.getElementById('daily-status');
+const menuDailyBtn = document.getElementById('menu-daily-btn');
 const regionSection = document.getElementById('region-section');
 const difficultySection = document.getElementById('difficulty-section');
 const stat1Label = document.getElementById('stat1-label');
@@ -334,21 +334,8 @@ function renderMenu() {
         tab.setAttribute('aria-pressed', String(tab.dataset.mode === mode));
     }
     setText(modeDesc, MODE_DESC[mode]);
-    show(regionSection, mode !== 'daily');
     show(difficultySection, mode === 'classic');
-    show(dailyStatus, mode === 'daily');
-
-    if (mode === 'daily') {
-        const key = dateKey();
-        const n = dailyNumber(key);
-        const streak = currentStreak();
-        let text = t(daily.done ? 'flag.daily.statusDone' : 'flag.daily.statusPending', { n });
-        if (streak > 0) text += ' ' + t('flag.daily.streakLine', { n: streak });
-        dailyStatus.textContent = text;
-        setText(startBtn, daily.done ? 'flag.daily.view' : 'flag.daily.play');
-    } else {
-        setText(startBtn, mode === 'rush' ? 'flag.rush.start' : 'flag.start');
-    }
+    setText(startBtn, mode === 'rush' ? 'flag.rush.start' : 'flag.start');
 }
 
 function selectMode(next) {
@@ -395,7 +382,6 @@ function setPlayLayout(which) {
 
 function startGame() {
     playSound('click');
-    if (mode === 'daily') return startDaily();
 
     selectedContinent = document.getElementById('continent-select').value;
     activeCountries = selectedContinent === "all" ? [...countries] : countries.filter(c => c.continent === selectedContinent);
@@ -795,6 +781,7 @@ async function dailyGuess() {
     dailyBusy = true;
     try {
         daily.guesses.push(guessed.code);
+        const before = board.revealed.slice();
         await applyGuess(guessed.code);
         guessInput.value = '';
         suggestions.close();
@@ -806,6 +793,9 @@ async function dailyGuess() {
             daily.won = false;
         }
         if (daily.done) {
+            renderGuessList();
+            const all = new Uint8Array(board.revealed.length).fill(1);
+            await animateReveal(flagCanvas, board.target, before, all);   // no fim, a bandeira inteira aparece
             drawBoard();
             finishDaily();
             return;
@@ -814,7 +804,9 @@ async function dailyGuess() {
         const last = board.rows[board.rows.length - 1];
         setMessage({ key: 'flag.daily.wrong', country: currentCountry, params: { n: DAILY_ATTEMPTS - daily.guesses.length, p: last.percent.toFixed(1) } }, 'error');
         saveDaily();
-        drawBoard();
+        renderGuessList();
+        renderDailyStats();
+        animateReveal(flagCanvas, board.target, before, board.revealed);
     } finally {
         dailyBusy = false;
     }
@@ -843,7 +835,7 @@ function showDailyEnd() {
     show(revealCaption, false);
     show(goClassicBtn, true);
     show(goRushBtn, true);
-    show(backBtn, true);
+    show(backBtn, false);               // daqui se vai ao Treino/Rush (botões acima) ou de volta ao GGEO (topo)
     setMessage(null);
     renderEnd();
     show(endPanel, true);
@@ -966,6 +958,7 @@ const suggestions = createAutocomplete({
 // Os botões eram ligados por onclick="..." no HTML. Como o script agora é um
 // módulo (suas funções não são globais), a ligação é feita aqui.
 startBtn.addEventListener('click', startGame);
+menuDailyBtn.addEventListener('click', () => { playSound('click'); startDaily(); });
 hintBtn.addEventListener('click', showHint);
 skipBtn.addEventListener('click', rushSkip);
 guessBtn.addEventListener('click', handleAction);

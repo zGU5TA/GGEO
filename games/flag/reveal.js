@@ -178,3 +178,42 @@ export function drawFull(canvas, target) {
     full.data.set(target.pixels);
     context.putImageData(full, 0, 0);
 }
+
+let animation = 0;
+
+// Revela com suavidade os pixels novos (em `after` mas não em `before`): fade-in de `ms` milissegundos.
+// Quem pediu movimento reduzido no sistema vê o resultado direto.
+export function animateReveal(canvas, target, before, after, ms = 800) {
+    const token = ++animation;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || ms <= 0) {
+        drawRevealed(canvas, target, after);
+        return Promise.resolve();
+    }
+    canvas.width = target.width;
+    canvas.height = target.height;
+    const context = canvas.getContext('2d');
+    const output = context.createImageData(target.width, target.height);
+    const total = target.width * target.height;
+    const fresh = [];
+    for (let i = 0; i < total; i++) {
+        const o = i * 4;
+        if (!after[i]) continue;
+        output.data[o] = target.pixels[o];
+        output.data[o + 1] = target.pixels[o + 1];
+        output.data[o + 2] = target.pixels[o + 2];
+        if (before[i]) output.data[o + 3] = 255; else fresh.push(o);
+    }
+    return new Promise((resolve) => {
+        const start = performance.now();
+        const step = (now) => {
+            if (token !== animation) return resolve();       // outra animação começou
+            const progress = Math.min(1, (now - start) / ms);
+            const alpha = Math.round(255 * (progress * (2 - progress)));   // ease-out
+            for (const o of fresh) output.data[o + 3] = alpha;
+            context.putImageData(output, 0, 0);
+            if (progress < 1) requestAnimationFrame(step); else resolve();
+        };
+        requestAnimationFrame(step);
+    });
+}

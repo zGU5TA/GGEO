@@ -60,17 +60,16 @@
         </div>
 
         <!-- MENU INICIAL -->
-        <div id="menu-screen">
+        <div id="menu-screen" class="hidden">
             <p class="subtitle" data-i18n="flag.subtitle">[ Jogo de Adivinhação de Bandeiras ]</p>
 
             <!-- Modos: Desafio diário (padrão), Clássico e Rush -->
             <div class="mode-tabs" role="group" data-i18n-attr="aria-label:flag.mode" aria-label="Modo de jogo">
-                <button type="button" class="mode-tab" data-mode="daily" aria-pressed="true" data-i18n="flag.mode.daily">Diário</button>
-                <button type="button" class="mode-tab" data-mode="classic" aria-pressed="false" data-i18n="flag.mode.classic">Treino</button>
+                <button type="button" class="mode-tab" data-mode="classic" aria-pressed="true" data-i18n="flag.mode.classic">Treino</button>
                 <button type="button" class="mode-tab" data-mode="rush" aria-pressed="false" data-i18n="flag.mode.rush">Rush</button>
             </div>
-            <p id="mode-desc" class="mode-desc" data-i18n="flag.daily.desc"></p>
-            <p id="daily-status" class="daily-status"></p>
+            <p id="mode-desc" class="mode-desc" data-i18n="flag.classic.desc"></p>
+            <button type="button" class="secondary-btn" id="menu-daily-btn" data-i18n="flag.daily.view">Ver o desafio de hoje</button>
 
             <div class="menu-section" id="region-section">
                 <label for="continent-select" data-i18n="flag.region">Região:</label>
@@ -99,7 +98,7 @@
         </div>
 
         <!-- TELA DO JOGO -->
-        <div id="game-screen" class="hidden">
+        <div id="game-screen">
             <div class="stats-container">
                 <div><span id="stat1-label" data-i18n="flag.score">Acertos:</span> <span id="score">0</span></div>
                 <div><span id="stat2-label" data-i18n="flag.record">Recorde:</span> <span id="record">0</span></div>

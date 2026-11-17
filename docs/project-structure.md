@@ -86,7 +86,7 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
 
 ### Flag: modos de jogo
 
-- **Diário (é a primeira tela do Flag):** uma bandeira escondida por dia, igual
+- **Diário (é a página de entrada do Flag; o menu Treino/Rush só aparece depois dele):** uma bandeira escondida por dia, igual
   para todos, 7 palpites, dica opcional (💡 no compartilhamento). Cada palpite
   revela os pedaços da bandeira do dia onde a bandeira palpitada tem cor parecida
   na mesma posição (`reveal.js`); mostra-se a % revelada por palpite. Treino e
