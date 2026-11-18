@@ -119,7 +119,7 @@
   "flag.mode.classic": "Treino",
   "flag.mode.rush": "Rush",
   "flag.daily.desc": "Uma bandeira escondida por dia, igual para todo mundo. Cada palpite revela as partes com a mesma cor. Você tem 7 palpites.",
-  "flag.classic.desc": "Treino: acerte o máximo de bandeiras seguidas. Se errar ou o tempo acabar, a sequência zera.",
+  "flag.classic.desc": "Treino: bandeiras sorteadas, sem limite de rodadas. Cada palpite revela as partes com a mesma cor. Você tem 7 palpites por bandeira.",
   "flag.rush.desc": "Quantas bandeiras você acerta em 1 minuto? Errar não encerra o jogo, mas também não pontua.",
   "flag.daily.play": "Jogar o desafio de hoje",
   "flag.daily.view": "Ver o resultado de hoje",
@@ -163,5 +163,7 @@
   "flag.go.classic": "Jogar o Treino",
   "flag.go.rush": "Jogar o Rush",
   "flag.daily.unknown": "Escolha um país da lista.",
-  "flag.daily.duplicate": "Você já tentou {name}."
+  "flag.daily.duplicate": "Você já tentou {name}.",
+  "flag.practice.streakLine": "Sequência: {n} · Recorde: {r}",
+  "flag.practice.lose": "Era: {name}."
 }

@@ -72,8 +72,6 @@ function loadRecords() {
 
 migrateLegacyStorage();
 let records = loadRecords();
-let roundEnded = false;
-let isLost = false;
 let hintUsed = false;
 
 // Mensagem do resultado e dica são guardadas como DADOS (e não como texto pronto),
@@ -108,7 +106,6 @@ const menuMessage = document.getElementById('menu-message');
 const modeDesc = document.getElementById('mode-desc');
 const menuDailyBtn = document.getElementById('menu-daily-btn');
 const regionSection = document.getElementById('region-section');
-const difficultySection = document.getElementById('difficulty-section');
 const stat1Label = document.getElementById('stat1-label');
 const stat2Label = document.getElementById('stat2-label');
 const statTime = document.getElementById('stat-time');
@@ -334,7 +331,6 @@ function renderMenu() {
         tab.setAttribute('aria-pressed', String(tab.dataset.mode === mode));
     }
     setText(modeDesc, MODE_DESC[mode]);
-    show(difficultySection, mode === 'classic');
     setText(startBtn, mode === 'rush' ? 'flag.rush.start' : 'flag.start');
 }
 
@@ -350,18 +346,21 @@ function selectMode(next) {
 
 function setPlayLayout(which) {
     playMode = which;
-    setText(stat1Label, which === 'daily' ? 'flag.stat.attempts' : 'flag.score');
+    const reveal = which === 'daily' || which === 'classic';
+    setText(stat1Label, reveal ? 'flag.stat.attempts' : 'flag.score');
     setText(stat2Label, which === 'daily' ? 'flag.stat.streak' : 'flag.record');
     show(statTime, which === 'rush');
-    show(timerContainer, which === 'rush' || (which === 'classic' && maxTime !== 0));
+    show(timerContainer, which === 'rush');
     show(hintBtn, which !== 'rush');
     show(skipBtn, which === 'rush');
     show(flagContainer, true);
-    show(flagCanvas, which === 'daily');
-    show(guessList, which === 'daily');
-    show(revealCaption, which === 'daily');
-    show(backBtn, which !== 'daily');       // no diário o botão só aparece quando termina (veja showDailyEnd)
-    if (which === 'daily') { flagImg.style.display = 'none'; loader.style.display = 'none'; }
+    show(flagCanvas, reveal);
+    show(guessList, reveal);
+    show(revealCaption, reveal);
+    show(shareBtn, true);
+    show(backBtn, which !== 'daily');       // no diário o botão só aparece quando termina (veja showRevealEnd)
+    if (reveal) { flagImg.style.display = 'none'; loader.style.display = 'none'; }
+    else { flagCanvas.getContext('2d').clearRect(0, 0, flagCanvas.width, flagCanvas.height); }
     show(gameArea, true);
     show(endPanel, false);
     show(endAgainBtn, false);
@@ -407,46 +406,30 @@ function returnToMenu(withSound = true) {
 }
 
 // ---------------------------------------------------------------------------
-// Modo Clássico (o jogo original: sequência de acertos, tempo por bandeira)
+// Treino (mesma mecânica do diário, mas infinito: bandeira sorteada, sem salvar)
 // ---------------------------------------------------------------------------
 
+let practice = { guesses: [], done: false, won: false };
+let practiceStreak = 0;     // bandeiras seguidas acertadas (sem dica) nesta sessão de treino
+
 function startClassic() {
-    maxTime = parseInt(document.getElementById('difficulty-select').value);
-    setPlayLayout('classic');
-    score = 0;
-    scoreSpan.textContent = score;
-    recordSpan.textContent = records[selectedContinent] || 0;
-    loadNewCountry();
+    practiceStreak = 0;
+    startPracticeRound();
 }
 
-function loadNewCountry() {
-    clearInterval(timerInterval);
-    roundEnded = false;
+function startPracticeRound() {
+    currentCountry = pickCountry(activeCountries, [currentCountry && currentCountry.code]);
+    practice = { guesses: [], done: false, won: false };
+    maxTime = 0;
+    setPlayLayout('classic');
     hintUsed = false;
     hintVisible = false;
     renderHint();
-    setMessage(null);
-    nextBtn.style.display = "none";
-    retryPending = false;
-    guessInput.value = "";
-    guessInput.disabled = false;
-    guessBtn.disabled = false;
-
-    currentCountry = pickCountry(activeCountries, [currentCountry && currentCountry.code]);
-
-    loadFlag(currentCountry, {
-        onReady: startTimer,
-        onError: () => {
-            // Falha de rede não é culpa do jogador: não zera a pontuação e oferece
-            // sortear outra bandeira, em vez de deixar o jogo travado.
-            isLost = false;
-            roundEnded = true;
-            guessInput.disabled = true;
-            guessBtn.disabled = true;
-            setText(nextBtn, 'flag.retry');
-            nextBtn.style.display = "block";
-        },
-    });
+    board = null;
+    flagReady = false;
+    renderRevealStats();
+    renderGuessList();
+    loadBoard();
 }
 
 function showHint() {
@@ -455,86 +438,6 @@ function showHint() {
     hintVisible = true;
     if (playMode === 'daily') { daily.hint = true; saveDaily(); }
     renderHint();
-}
-
-function startTimer() {
-    if (maxTime === 0) return;
-
-    currentTime = maxTime;
-    updateTimerBar();
-
-    timerInterval = setInterval(() => {
-        currentTime -= 0.1;
-        updateTimerBar();
-
-        if (currentTime <= 0) {
-            clearInterval(timerInterval);
-            timeOut();
-        }
-    }, 100);
-}
-
-function updateTimerBar() {
-    const percentage = (currentTime / maxTime) * 100;
-    timerBar.style.width = percentage + "%";
-}
-
-function timeOut() {
-    playSound('error');
-    isLost = true;
-    setMessage({ key: 'flag.timeout', country: currentCountry }, 'error');
-    score = 0;
-    scoreSpan.textContent = score;
-    endRound();
-}
-
-function checkGuess() {
-    const userGuess = guessInput.value;
-    // Campo vazio: não faz nada e o cronômetro continua correndo.
-    if (!userGuess.trim()) return;
-
-    clearInterval(timerInterval);
-
-    // Aceita o nome do país no idioma em que se joga (ver js/country-names.js).
-    const isMatch = matchesCountry(userGuess, currentCountry);
-
-    if (isMatch) {
-        playSound('success');
-        isLost = false;
-        rememberCorrect(currentCountry);
-        setMessage({ key: 'flag.correct', country: currentCountry, hintNote: hintUsed }, 'success');
-
-        if (!hintUsed) {
-            score++;
-            scoreSpan.textContent = score;
-            if (score > (records[selectedContinent] || 0)) {
-                records[selectedContinent] = score;
-                saveJson(STORAGE.records, records);
-                recordSpan.textContent = score;
-            }
-        }
-    } else {
-        playSound('error');
-        isLost = true;
-        setMessage({ key: 'flag.incorrect', country: currentCountry }, 'error');
-        score = 0;
-        scoreSpan.textContent = score;
-
-        guessInput.classList.add('shake');
-        setTimeout(() => guessInput.classList.remove('shake'), 300);
-    }
-    endRound();
-}
-
-function endRound() {
-    roundEnded = true;
-    suggestions.close();
-    guessInput.disabled = true;
-    guessBtn.disabled = true;
-
-    setText(nextBtn, isLost ? 'flag.restart' : 'flag.next');
-    nextBtn.style.display = "block";
-    nextBtn.focus();
 }
 
 // ---------------------------------------------------------------------------
@@ -653,12 +556,15 @@ function endRush() {
 // Desafio diário (bandeira escondida, revelada pelas cores dos palpites)
 // ---------------------------------------------------------------------------
 
+// Estado da rodada com revelação: o diário (salvo) ou o treino (só na memória).
+const state = () => (playMode === 'daily' ? daily : practice);
+
 let board = null;          // { target (análise da bandeira do dia), revealed (máscara), rows: [{ code, percent }] }
 let boardToken = 0;
 
-function renderDailyStats() {
-    scoreSpan.textContent = `${daily.guesses.length}/${DAILY_ATTEMPTS}`;
-    recordSpan.textContent = currentStreak();
+function renderRevealStats() {
+    scoreSpan.textContent = `${state().guesses.length}/${DAILY_ATTEMPTS}`;
+    recordSpan.textContent = playMode === 'daily' ? currentStreak() : (records[selectedContinent] || 0);
 }
 
 function byCode(code) {
@@ -707,10 +613,10 @@ async function applyGuess(code) {
 }
 
 function drawBoard() {
-    if (daily.done) drawFull(flagCanvas, board.target);
+    if (state().done) drawFull(flagCanvas, board.target);
     else drawRevealed(flagCanvas, board.target, board.revealed);
     renderGuessList();
-    renderDailyStats();
+    renderRevealStats();
 }
 
 // Prepara a bandeira do dia e refaz o estado salvo (palpites e fim, se já terminou).
@@ -718,19 +624,19 @@ async function loadBoard() {
     const token = ++boardToken;
     retryPending = false;
     nextBtn.style.display = 'none';
-    guessInput.disabled = daily.done;
-    guessBtn.disabled = daily.done;
+    guessInput.disabled = state().done;
+    guessBtn.disabled = state().done;
     try {
         const target = await analyzeFlag(flagUrl(currentCountry));
         if (token !== boardToken) return;
         board = { target, revealed: new Uint8Array(target.width * target.height), rows: [] };
-        for (const code of daily.guesses) {
+        for (const code of state().guesses) {
             if (byCode(code)) await applyGuess(code);
         }
         if (token !== boardToken) return;
         flagReady = true;
         drawBoard();
-        if (daily.done) showDailyEnd(); else guessInput.focus({ preventScroll: true });
+        if (state().done) showRevealEnd(); else guessInput.focus({ preventScroll: true });
     } catch (error) {
         console.error('Falha ao carregar a bandeira do dia:', error);
         flagReady = false;
@@ -751,7 +657,7 @@ function startDaily() {
     renderHint();
     board = null;
     flagReady = false;
-    renderDailyStats();
+    renderRevealStats();
     renderGuessList();
     loadBoard();
 }
@@ -761,9 +667,9 @@ function findCountry(text) {
     return countries.find((country) => matchesCountry(text, country)) || null;
 }
 
-async function dailyGuess() {
+async function revealGuess() {
     const text = guessInput.value;
-    if (daily.done || !flagReady || !text.trim() || dailyBusy) return;
+    if (state().done || !flagReady || !text.trim() || dailyBusy) return;
 
     const guessed = findCountry(text);
     if (!guessed) {                                     // não é um país da lista: não gasta tentativa
@@ -773,39 +679,39 @@ async function dailyGuess() {
         setTimeout(() => guessInput.classList.remove('shake'), 300);
         return;
     }
-    if (daily.guesses.includes(guessed.code)) {         // repetido também não gasta
+    if (state().guesses.includes(guessed.code)) {         // repetido também não gasta
         setMessage({ key: 'flag.daily.duplicate', country: guessed }, 'error');
         return;
     }
 
     dailyBusy = true;
     try {
-        daily.guesses.push(guessed.code);
+        state().guesses.push(guessed.code);
         const before = board.revealed.slice();
         await applyGuess(guessed.code);
         guessInput.value = '';
         suggestions.close();
         if (guessed.code === currentCountry.code) {
-            daily.done = true;
-            daily.won = true;
-        } else if (daily.guesses.length >= DAILY_ATTEMPTS) {
-            daily.done = true;
-            daily.won = false;
+            state().done = true;
+            state().won = true;
+        } else if (state().guesses.length >= DAILY_ATTEMPTS) {
+            state().done = true;
+            state().won = false;
         }
-        if (daily.done) {
+        if (state().done) {
             renderGuessList();
             const all = new Uint8Array(board.revealed.length).fill(1);
             await animateReveal(flagCanvas, board.target, before, all);   // no fim, a bandeira inteira aparece
             drawBoard();
-            finishDaily();
+            finishReveal();
             return;
         }
         playSound('detour');
         const last = board.rows[board.rows.length - 1];
-        setMessage({ key: 'flag.daily.wrong', country: currentCountry, params: { n: DAILY_ATTEMPTS - daily.guesses.length, p: last.percent.toFixed(1) } }, 'error');
-        saveDaily();
+        setMessage({ key: 'flag.daily.wrong', country: currentCountry, params: { n: DAILY_ATTEMPTS - state().guesses.length, p: last.percent.toFixed(1) } }, 'error');
+        if (playMode === 'daily') saveDaily();
         renderGuessList();
-        renderDailyStats();
+        renderRevealStats();
         animateReveal(flagCanvas, board.target, before, board.revealed);
     } finally {
         dailyBusy = false;
@@ -813,33 +719,49 @@ async function dailyGuess() {
 }
 let dailyBusy = false;
 
-function finishDaily() {
-    const today = dateKey();
-    if (daily.won) {
-        daily.streak = daily.lastWin === yesterdayKey(today) ? daily.streak + 1 : 1;
-        daily.lastWin = today;
-        rememberCorrect(currentCountry);   // (não afeta o sorteio do diário, só o dos outros modos)
+function finishReveal() {
+    if (playMode === 'daily') {
+        const today = dateKey();
+        if (daily.won) {
+            daily.streak = daily.lastWin === yesterdayKey(today) ? daily.streak + 1 : 1;
+            daily.lastWin = today;
+            rememberCorrect(currentCountry);   // (não afeta o sorteio do diário, só o dos outros modos)
+        }
+        saveDaily();
+    } else {
+        rememberCorrect(currentCountry);
+        if (practice.won && !hintUsed) {
+            practiceStreak++;
+            if (practiceStreak > (records[selectedContinent] || 0)) {
+                records[selectedContinent] = practiceStreak;
+                saveJson(STORAGE.records, records);
+            }
+        } else if (!practice.won) {
+            practiceStreak = 0;
+        }
     }
-    saveDaily();
-    renderDailyStats();
-    playSound(daily.won ? 'win' : 'lose');
-    showDailyEnd();
+    renderRevealStats();
+    playSound(state().won ? 'win' : 'lose');
+    showRevealEnd();
 }
 
-function showDailyEnd() {
+function showRevealEnd() {
+    const isDaily = playMode === 'daily';
     suggestions.close();
     guessInput.disabled = true;
     guessBtn.disabled = true;
     show(gameArea, false);
     show(hintBtn, false);
     show(revealCaption, false);
-    show(goClassicBtn, true);
-    show(goRushBtn, true);
-    show(backBtn, false);               // daqui se vai ao Treino/Rush (botões acima) ou de volta ao GGEO (topo)
+    show(goClassicBtn, isDaily);
+    show(goRushBtn, isDaily);
+    show(endAgainBtn, !isDaily);        // treino: "Jogar novamente"
+    show(shareBtn, isDaily);
+    show(backBtn, !isDaily);            // diário: segue para Treino/Rush (botões) ou volta ao GGEO (topo)
     setMessage(null);
     renderEnd();
     show(endPanel, true);
-    shareBtn.focus({ preventScroll: true });
+    (isDaily ? shareBtn : endAgainBtn).focus({ preventScroll: true });
 }
 
 // Depois do diário: Treino e Rush ficam disponíveis no menu.
@@ -854,7 +776,7 @@ function goToMode(next) {
 // ---------------------------------------------------------------------------
 
 function renderEnd() {
-    if (!endPanel || (playMode !== 'daily' && playMode !== 'rush')) return;
+    if (!endPanel || !playMode) return;
     if (playMode === 'rush') {
         endTitle.textContent = t('flag.rush.endTitle');
         endText.textContent = t('flag.rush.endText', { n: rush.score });
@@ -862,10 +784,15 @@ function renderEnd() {
         return;
     }
     const name = countryName(currentCountry, getLang());
-    endTitle.textContent = t(daily.won ? 'flag.daily.winTitle' : 'flag.daily.loseTitle');
-    endText.textContent = daily.won
-        ? t('flag.daily.win', { name, n: daily.guesses.length, max: DAILY_ATTEMPTS })
-        : t('flag.daily.lose', { name });
+    const round = state();
+    endTitle.textContent = t(round.won ? 'flag.daily.winTitle' : 'flag.daily.loseTitle');
+    endText.textContent = round.won
+        ? t('flag.daily.win', { name, n: round.guesses.length, max: DAILY_ATTEMPTS })
+        : t(playMode === 'classic' ? 'flag.practice.lose' : 'flag.daily.lose', { name });
+    if (playMode === 'classic') {
+        endExtra.textContent = t('flag.practice.streakLine', { n: practiceStreak, r: records[selectedContinent] || 0 });
+        return;
+    }
     const streak = currentStreak();
     endExtra.textContent = t('flag.daily.comeBack') + (streak > 0 ? ' ' + t('flag.daily.streakLine', { n: streak }) : '');
 }
@@ -899,24 +826,15 @@ async function shareResult() {
 function handleAction() {
     playSound('click');
     if (playMode === 'rush') return rushGuess();
-    if (playMode === 'daily') return dailyGuess();
-    if (!roundEnded) {
-        checkGuess();
-    } else {
-        handleRoundAction();
-    }
+    return revealGuess();
 }
 
 function handleRoundAction() {
     playSound('click');
-    if (retryPending && playMode === 'daily') {   // diário: tenta carregar a MESMA bandeira de novo
+    if (retryPending) {                           // tenta carregar a MESMA bandeira de novo
         setMessage(null);
         loadBoard();
-        return;
     }
-    if (retryPending) retryPending = false;
-    loadNewCountry();
-    guessInput.focus();
 }
 
 // Sugestões de países enquanto digita (setas, Enter, mouse). Escolher uma
@@ -935,8 +853,7 @@ function buildSearchEntries() {
 function canType() {
     if (guessInput.disabled) return false;
     if (playMode === 'rush') return rush.active;
-    if (playMode === 'daily') return !daily.done;
-    return !roundEnded;
+    return !state().done;
 }
 
 const suggestions = createAutocomplete({
@@ -964,7 +881,7 @@ skipBtn.addEventListener('click', rushSkip);
 guessBtn.addEventListener('click', handleAction);
 nextBtn.addEventListener('click', handleRoundAction);
 shareBtn.addEventListener('click', shareResult);
-endAgainBtn.addEventListener('click', () => { playSound('click'); startRush(); });
+endAgainBtn.addEventListener('click', () => { playSound('click'); if (playMode === 'rush') startRush(); else startPracticeRound(); });
 backBtn.addEventListener('click', () => returnToMenu());
 goClassicBtn.addEventListener('click', () => goToMode('classic'));
 goRushBtn.addEventListener('click', () => goToMode('rush'));
@@ -979,7 +896,7 @@ onLangChange(() => {
     renderMessage();
     renderHint();
     renderMenu();
-    if (playMode === 'daily' && board) renderGuessList();
+    if ((playMode === 'daily' || playMode === 'classic') && board) renderGuessList();
     if (!endPanel.classList.contains('hidden')) renderEnd();
     buildSearchEntries();
     suggestions.close();

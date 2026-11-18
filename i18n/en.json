@@ -119,7 +119,7 @@
   "flag.mode.classic": "Practice",
   "flag.mode.rush": "Rush",
   "flag.daily.desc": "One hidden flag a day, the same for everyone. Each guess reveals the parts with the same colour. You get 7 guesses.",
-  "flag.classic.desc": "Practice: guess as many flags in a row as you can. A mistake or time running out resets your streak.",
+  "flag.classic.desc": "Practice: random flags, no limit on rounds. Each guess reveals the parts with the same colour. You get 7 guesses per flag.",
   "flag.rush.desc": "How many flags can you get in 1 minute? A wrong answer doesn't end the game, but it doesn't score either.",
   "flag.daily.play": "Play today's challenge",
   "flag.daily.view": "View today's result",
@@ -163,5 +163,7 @@
   "flag.go.classic": "Play Practice",
   "flag.go.rush": "Play Rush",
   "flag.daily.unknown": "Pick a country from the list.",
-  "flag.daily.duplicate": "You already tried {name}."
+  "flag.daily.duplicate": "You already tried {name}.",
+  "flag.practice.streakLine": "Streak: {n} · Best: {r}",
+  "flag.practice.lose": "It was: {name}."
 }

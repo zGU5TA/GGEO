@@ -119,7 +119,7 @@
   "flag.mode.classic": "练习",
   "flag.mode.rush": "冲刺",
   "flag.daily.desc": "每天一面隐藏的国旗，所有人相同。每次猜测会显示颜色相同的部分。你有 7 次机会。",
-  "flag.classic.desc": "练习：连续猜对尽可能多的国旗。猜错或超时，连胜归零。",
+  "flag.classic.desc": "练习：随机国旗，不限回合。每次猜测会显示颜色相同的部分。每面国旗有 7 次机会。",
   "flag.rush.desc": "1 分钟内你能答对多少面旗帜？答错不会结束游戏，但也不得分。",
   "flag.daily.play": "开始今天的挑战",
   "flag.daily.view": "查看今天的结果",
@@ -163,5 +163,7 @@
   "flag.go.classic": "玩练习模式",
   "flag.go.rush": "玩 Rush",
   "flag.daily.unknown": "请从列表中选择一个国家。",
-  "flag.daily.duplicate": "你已经猜过 {name}。"
+  "flag.daily.duplicate": "你已经猜过 {name}。",
+  "flag.practice.streakLine": "连胜：{n} · 最佳：{r}",
+  "flag.practice.lose": "答案是：{name}。"
 }

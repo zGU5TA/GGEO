@@ -119,7 +119,7 @@
   "flag.mode.classic": "Práctica",
   "flag.mode.rush": "Rush",
   "flag.daily.desc": "Una bandera oculta al día, igual para todos. Cada intento revela las partes del mismo color. Tienes 7 intentos.",
-  "flag.classic.desc": "Práctica: acierta el máximo de banderas seguidas. Si fallas o se acaba el tiempo, la racha vuelve a cero.",
+  "flag.classic.desc": "Práctica: banderas al azar, sin límite de rondas. Cada intento revela las partes del mismo color. Tienes 7 intentos por bandera.",
   "flag.rush.desc": "¿Cuántas banderas aciertas en 1 minuto? Fallar no termina el juego, pero tampoco suma.",
   "flag.daily.play": "Jugar el desafío de hoy",
   "flag.daily.view": "Ver el resultado de hoy",
@@ -163,5 +163,7 @@
   "flag.go.classic": "Jugar Práctica",
   "flag.go.rush": "Jugar Rush",
   "flag.daily.unknown": "Elige un país de la lista.",
-  "flag.daily.duplicate": "Ya probaste {name}."
+  "flag.daily.duplicate": "Ya probaste {name}.",
+  "flag.practice.streakLine": "Racha: {n} · Récord: {r}",
+  "flag.practice.lose": "Era: {name}."
 }

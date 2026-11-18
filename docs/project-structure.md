@@ -97,7 +97,7 @@ outro: se dois jogos precisam da mesma coisa, ela sobe para `css/`, `js/` ou
   `DAILY_FIRST_DAY`**, senão o calendário muda. Acrescentar países ao
   `countries.json` também muda a ordem dos dias futuros. O dia é o da data local
   da pessoa (como no Wordle). Há sequência de dias seguidos.
-- **Treino (antes "Clássico"):** o jogo original (sequência de acertos, tempo por bandeira).
+- **Treino (antes "Clássico"):** a mesma mecânica do diário (bandeira escondida, 7 palpites, revelação por cores), mas infinito: sorteia uma bandeira da região escolhida, sem salvar a rodada, e o botão "Jogar novamente" sorteia a próxima. Sequência de acertos sem dica e recorde por região (`ggeo_flag_records`). Não tem mais cronômetro nem dificuldade.
 - **Rush:** 1 minuto; acertar pontua, errar ou pular só passa para a próxima
   (sem perder). O relógio começa quando a primeira bandeira aparece, e a próxima
   é pré-carregada. Recorde por região (`rush:<região>`).
