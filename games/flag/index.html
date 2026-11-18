@@ -69,6 +69,10 @@
                 <button type="button" class="mode-tab" data-mode="rush" aria-pressed="false" data-i18n="flag.mode.rush">Rush</button>
             </div>
             <p id="mode-desc" class="mode-desc" data-i18n="flag.classic.desc"></p>
+            <div id="challenge-banner" class="challenge-banner hidden">
+                <p id="challenge-text"></p>
+                <button type="button" class="secondary-btn" id="challenge-drop-btn" data-i18n="flag.challenge.drop">Jogar sem desafio</button>
+            </div>
             <button type="button" class="secondary-btn" id="menu-daily-btn" data-i18n="flag.daily.view">Ver o desafio de hoje</button>
 
             <div class="menu-section" id="region-section">
@@ -108,7 +112,7 @@
             <p id="reveal-caption" class="reveal-caption" data-i18n="flag.reveal.caption">Cada palpite revela as partes da bandeira que têm a mesma cor.</p>
             <ol id="guess-list" class="guess-list" aria-label="Palpites"></ol>
 
-            <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn" data-i18n="flag.hintButton">💡 Pedir Dica (-1 Rodada sem bônus)</button>
+            <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn" data-i18n="flag.hintButton">💡 Mostrar dica</button>
             <div id="hint-box" class="hint-box" aria-live="polite"></div>
 
             <div id="game-area">

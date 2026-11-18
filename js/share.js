@@ -28,3 +28,15 @@ export async function copyText(text) {
 export function siteUrl() {
     return new URL('../../', location.href).href;
 }
+
+/**
+ * Link de desafio: a página atual (Flag ou Rotas) com os parâmetros dados, sem
+ * nenhum outro. Tudo vai na própria URL; não existe servidor nem conta.
+ */
+export function challengeUrl(params) {
+    const url = new URL(location.href);
+    url.search = '';
+    url.hash = '';
+    for (const [key, value] of Object.entries(params)) url.searchParams.set(key, String(value));
+    return url.href;
+}

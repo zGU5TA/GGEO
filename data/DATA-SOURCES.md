@@ -30,3 +30,7 @@
 - `assets/flags/*.svg`: bandeiras do projeto **country-flags** (hampusborgos,
   https://github.com/hampusborgos/country-flags), SVGs de Wikimedia Commons na
   proporção real de cada bandeira. Bandeiras são de domínio público. Uma por país do Flag.
+
+## População (campo `population` em `countries.json`)
+
+Vem do campo `POP_EST` do Natural Earth (`ne_10m_admin_0_countries`, domínio público). São estimativas de cerca de 2019 (alguns territórios, de anos antes), usadas só como dica aproximada ("≈ 211 milhões").

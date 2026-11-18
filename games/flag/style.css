@@ -232,3 +232,7 @@
 .guess-row.is-correct { border-color: var(--accent); }
 .guess-percent { font-variant-numeric: tabular-nums; color: var(--muted); }
 .guess-flag { width: 2.5rem; height: 1.6rem; object-fit: contain; justify-self: end; }
+
+/* Link de desafio do Rush */
+.challenge-banner { border: 1px solid var(--accent); padding: 0.6rem 0.75rem; margin: 0 0 0.75rem; text-align: center; }
+.challenge-banner p { margin: 0 0 0.5rem; }

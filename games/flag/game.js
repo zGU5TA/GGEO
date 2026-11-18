@@ -2,7 +2,7 @@ import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
 import { countryName, capitalName, matchesCountry, acceptedAnswers } from '../../js/country-names.js';
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
-import { copyText, siteUrl } from '../../js/share.js';
+import { copyText, siteUrl, challengeUrl } from '../../js/share.js';
 import { analyzeFlag, overlap, fraction, addMask, drawRevealed, drawFull, animateReveal } from './reveal.js';
 
 // A lista de países fica em data/countries.json, compartilhada entre os jogos.
@@ -104,6 +104,9 @@ const hintBox = document.getElementById('hint-box');
 const startBtn = document.getElementById('start-btn');
 const menuMessage = document.getElementById('menu-message');
 const modeDesc = document.getElementById('mode-desc');
+const challengeBanner = document.getElementById('challenge-banner');
+const challengeText = document.getElementById('challenge-text');
+const regionSelect = document.getElementById('continent-select');
 const menuDailyBtn = document.getElementById('menu-daily-btn');
 const regionSection = document.getElementById('region-section');
 const stat1Label = document.getElementById('stat1-label');
@@ -181,6 +184,15 @@ function setMessage(state, kind) {
 }
 
 // Escreve a dica (capital + continente) no idioma atual.
+// População aproximada, escrita por extenso no idioma ("211 milhões", "211 million", "2.1亿").
+function formatPopulation(value, lang) {
+    try {
+        return new Intl.NumberFormat(lang, { notation: 'compact', compactDisplay: 'long', maximumSignificantDigits: 3 }).format(value);
+    } catch (error) {
+        return String(value);
+    }
+}
+
 function renderHint() {
     if (!hintVisible) {
         hintBox.textContent = "";
@@ -194,6 +206,7 @@ function renderHint() {
     hintBox.append(label, ' ' + t('flag.hintBody', {
         capital: capitalName(currentCountry, lang),
         continent: t(`continent.${currentCountry.continent}`),
+        population: formatPopulation(currentCountry.population, lang),
     }));
     hintBox.classList.add('active');
 }
@@ -331,11 +344,27 @@ function renderMenu() {
         tab.setAttribute('aria-pressed', String(tab.dataset.mode === mode));
     }
     setText(modeDesc, MODE_DESC[mode]);
-    setText(startBtn, mode === 'rush' ? 'flag.rush.start' : 'flag.start');
+    const challenged = !!pendingChallenge && mode === 'rush';
+    setText(startBtn, challenged ? 'flag.challenge.start' : mode === 'rush' ? 'flag.rush.start' : 'flag.start');
+    show(challengeBanner, challenged);
+    regionSelect.disabled = challenged;          // a região faz parte do desafio
+    if (challenged) {
+        regionSelect.value = pendingChallenge.region;
+        challengeText.textContent = t('flag.challenge.banner', {
+            n: pendingChallenge.theirs,
+            region: t(`flag.region.${pendingChallenge.region}`),
+        });
+    }
+}
+
+function dropChallenge() {
+    pendingChallenge = null;
+    renderMenu();
 }
 
 function selectMode(next) {
     playSound('click');
+    if (next !== 'rush') pendingChallenge = null;
     mode = next;
     renderMenu();
 }
@@ -444,11 +473,32 @@ function showHint() {
 // Modo Rush (1 minuto)
 // ---------------------------------------------------------------------------
 
-const rush = { active: false, started: false, endsAt: 0, score: 0, next: null, newRecord: false, previous: 0 };
+const rush = { active: false, started: false, endsAt: 0, score: 0, next: null, newRecord: false, previous: 0,
+    seed: 0, order: [], index: 0, challenge: null };
+
+// A sequência de bandeiras de cada Rush vem de uma semente: com a mesma semente e a mesma região,
+// duas pessoas veem as mesmas bandeiras na mesma ordem (é o que torna o desafio justo).
+let pendingChallenge = null;   // { seed, region, theirs } vindo do link; vale para o próximo Rush
+
+function rushPick() {
+    const country = rush.order[rush.index % rush.order.length];
+    rush.index++;
+    return country;
+}
 let rushClock = null;
 
 function startRush() {
     setPlayLayout('rush');
+    rush.challenge = pendingChallenge;
+    rush.seed = pendingChallenge ? pendingChallenge.seed : Math.floor(Math.random() * 0xffffffff);
+    const random = seededRandom(rush.seed);
+    random();
+    rush.order = [...activeCountries].sort((a, b) => (a.code < b.code ? -1 : 1));
+    for (let i = rush.order.length - 1; i > 0; i--) {
+        const j = Math.floor(random() * (i + 1));
+        [rush.order[i], rush.order[j]] = [rush.order[j], rush.order[i]];
+    }
+    rush.index = 0;
     rush.active = true;
     rush.started = false;      // o relógio só começa quando a primeira bandeira aparece
     rush.score = 0;
@@ -466,7 +516,7 @@ function startRush() {
 
 // Mostra a próxima bandeira (já sorteada e pré-carregada, para não perder tempo de rede).
 function rushAdvance() {
-    currentCountry = rush.next || pickCountry(activeCountries, [currentCountry && currentCountry.code]);
+    currentCountry = rush.next || rushPick();
     rush.next = null;
     guessInput.value = "";
     suggestions.close();
@@ -479,7 +529,7 @@ function rushAdvance() {
                 rushClock = setInterval(rushTick, 100);
             }
             // pré-carrega a seguinte
-            rush.next = pickCountry(activeCountries, [currentCountry.code]);
+            rush.next = rushPick();
             new Image().src = flagUrl(rush.next);
         },
         onError: () => { /* o botão "Pular" continua valendo */ },
@@ -730,7 +780,7 @@ function finishReveal() {
         saveDaily();
     } else {
         rememberCorrect(currentCountry);
-        if (practice.won && !hintUsed) {
+        if (practice.won) {
             practiceStreak++;
             if (practiceStreak > (records[selectedContinent] || 0)) {
                 records[selectedContinent] = practiceStreak;
@@ -775,12 +825,20 @@ function goToMode(next) {
 // Painel de fim (Desafio diário e Rush) e compartilhar
 // ---------------------------------------------------------------------------
 
+// Resultado frente ao amigo: mais bandeiras vence.
+function challengeVerdict() {
+    const mine = rush.score;
+    const theirs = rush.challenge.theirs;
+    return t(mine > theirs ? 'flag.challenge.win' : mine === theirs ? 'flag.challenge.tie' : 'flag.challenge.lose', { mine, theirs });
+}
+
 function renderEnd() {
     if (!endPanel || !playMode) return;
     if (playMode === 'rush') {
         endTitle.textContent = t('flag.rush.endTitle');
         endText.textContent = t('flag.rush.endText', { n: rush.score });
-        endExtra.textContent = rush.newRecord ? t('flag.rush.newRecord') : t('flag.rush.recordLine', { n: rush.previous });
+        const record = rush.newRecord ? t('flag.rush.newRecord') : t('flag.rush.recordLine', { n: rush.previous });
+        endExtra.textContent = rush.challenge ? `${challengeVerdict()} ${record}` : record;
         return;
     }
     const name = countryName(currentCountry, getLang());
@@ -800,7 +858,14 @@ function renderEnd() {
 function shareText() {
     if (playMode === 'rush') {
         const region = t(`flag.region.${selectedContinent}`);
-        return [t('flag.share.rushHeader'), t('flag.share.rushLine', { n: rush.score, region }), siteUrl()].join('\n');
+        const lines = [t('flag.share.rushHeader'), t('flag.share.rushLine', { n: rush.score, region })];
+        if (rush.score > 0) {
+            // O link leva a mesma sequência de bandeiras e a sua pontuação para o amigo superar.
+            lines.push(t('flag.challenge.shareLine', { url: challengeUrl({ c: rush.seed.toString(36), r: selectedContinent, s: rush.score }) }));
+        } else {
+            lines.push(siteUrl());
+        }
+        return lines.join('\n');
     }
     // Um quadrado por palpite, do mais longe ao mais perto da bandeira (sem revelar nada do país).
     const tier = (entry) => (entry.correct ? '🟩' : entry.percent < 10 ? '⬛' : entry.percent < 25 ? '🟥' : entry.percent < 45 ? '🟧' : '🟨');
@@ -808,7 +873,7 @@ function shareText() {
     const tries = `${daily.won ? daily.guesses.length : 'X'}/${DAILY_ATTEMPTS}`;
     return [
         t('flag.share.dailyHeader', { n: dailyNumber(daily.date) }),
-        `${squares} ${tries}${daily.hint ? ' 💡' : ''}`,
+        `${squares} ${tries}`,
         siteUrl(),
     ].join('\n');
 }
@@ -875,13 +940,14 @@ const suggestions = createAutocomplete({
 // Os botões eram ligados por onclick="..." no HTML. Como o script agora é um
 // módulo (suas funções não são globais), a ligação é feita aqui.
 startBtn.addEventListener('click', startGame);
+document.getElementById('challenge-drop-btn').addEventListener('click', () => { playSound('click'); dropChallenge(); });
 menuDailyBtn.addEventListener('click', () => { playSound('click'); startDaily(); });
 hintBtn.addEventListener('click', showHint);
 skipBtn.addEventListener('click', rushSkip);
 guessBtn.addEventListener('click', handleAction);
 nextBtn.addEventListener('click', handleRoundAction);
 shareBtn.addEventListener('click', shareResult);
-endAgainBtn.addEventListener('click', () => { playSound('click'); if (playMode === 'rush') startRush(); else startPracticeRound(); });
+endAgainBtn.addEventListener('click', () => { playSound('click'); if (playMode === 'rush') { pendingChallenge = null; startRush(); } else startPracticeRound(); });
 backBtn.addEventListener('click', () => returnToMenu());
 goClassicBtn.addEventListener('click', () => goToMode('classic'));
 goRushBtn.addEventListener('click', () => goToMode('rush'));
@@ -907,5 +973,28 @@ await initI18n();
 await loadCountries();
 buildSearchEntries();
 renderMenu();
+// Link de desafio (?c=semente&r=região&s=pontos): abre direto o Rush do amigo.
+function readChallenge() {
+    const query = new URLSearchParams(location.search);
+    const seed = parseInt(query.get('c'), 36);
+    const region = query.get('r');
+    const theirs = parseInt(query.get('s'), 10);
+    const regions = [...regionSelect.options].map((option) => option.value);
+    if (!/^[0-9a-z]{1,8}$/.test(query.get('c') || '') || !Number.isFinite(seed) || seed < 0 || seed > 0xffffffff) return null;
+    if (!regions.includes(region) || !(theirs > 0 && theirs <= 999)) return null;
+    return { seed, region, theirs };
+}
+
 // A primeira coisa que a pessoa vê é o desafio diário; o menu (Treino e Rush) vem depois.
-if (countries.length > 0) startDaily();
+// (Quem chega por um link de desafio vai direto ao Rush do amigo.)
+if (countries.length > 0) {
+    pendingChallenge = readChallenge();
+    if (pendingChallenge) {
+        mode = 'rush';
+        menuScreen.classList.remove('hidden');
+        gameScreen.classList.add('hidden');
+        renderMenu();
+    } else {
+        startDaily();
+    }
+}

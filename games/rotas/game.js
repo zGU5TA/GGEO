@@ -19,7 +19,7 @@ import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
 import { countryName, acceptedAnswers, normalize } from '../../js/country-names.js';
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
-import { copyText, siteUrl } from '../../js/share.js';
+import { copyText, siteUrl, challengeUrl } from '../../js/share.js';
 
 const BORDERS_URL = new URL('../../data/world-borders.json', import.meta.url);
 const MAP_URL = new URL('../../data/world-map.json', import.meta.url);
@@ -96,6 +96,8 @@ let statusState = null;    // { key, id?, state? }
 let yourPath = [];         // caminho montado pelos palpites (só na vitória)
 let copied = false;        // mostrou "resultado copiado"?
 let mode = 'daily';        // 'daily' (rota do dia) | 'practice' (treino infinito)
+let routeCode = null;      // rota do treino em forma de código ('índice-0/1'), para os links de desafio
+let challenge = null;      // null | { theirs: palpites do amigo }
 let daily = null;          // { date, guesses, hints, ended, streak, lastWin }
 let svg, projection, pathGenerator;
 
@@ -236,18 +238,31 @@ function pickRoute() {
         return Math.exp(-RECENT_PENALTY * load);
     });
     let roll = Math.random() * weights.reduce((sum, w) => sum + w, 0);
-    let chosen = routePairs[routePairs.length - 1];
+    let index = routePairs.length - 1;
     for (let i = 0; i < routePairs.length; i++) {
         roll -= weights[i];
-        if (roll <= 0) { chosen = routePairs[i]; break; }
+        if (roll <= 0) { index = i; break; }
     }
+    const chosen = routePairs[index];
     for (const id of Object.keys(recent)) {
         recent[id] *= RECENT_DECAY;
         if (recent[id] < 0.02) delete recent[id];
     }
     for (const id of chosen.members) recent[id] = (recent[id] || 0) + 1;
     saveRecent(recent);
-    return Math.random() < 0.5 ? [chosen.a, chosen.b, chosen.d] : [chosen.b, chosen.a, chosen.d];
+    const flip = Math.random() < 0.5 ? 0 : 1;
+    routeCode = `${index}-${flip}`;
+    return pairFromCode(routeCode);
+}
+
+// Código da rota ('índice-0/1') -> [origem, destino, distância]; null se for inválido.
+// Vale em qualquer aparelho porque a lista de pares sai sempre igual dos mesmos dados.
+function pairFromCode(code) {
+    if (!routePairs) buildRoutePairs();
+    const match = /^(\d{1,6})-([01])$/.exec(code || '');
+    const pair = match && routePairs[Number(match[1])];
+    if (!pair) return null;
+    return match[2] === '0' ? [pair.a, pair.b, pair.d] : [pair.b, pair.a, pair.d];
 }
 
 // Menor caminho de `from` até `to`, passando só por `allowed` (se informado).
@@ -492,7 +507,8 @@ function renderRoute() {
     arrow.setAttribute('aria-hidden', 'true');
     const badge = document.createElement('span');
     badge.className = 'mode-badge';
-    badge.textContent = mode === 'daily' ? t('rotas.mode.daily', { n: dailyNumber(daily.date) }) : t('rotas.mode.practice');
+    badge.textContent = mode === 'daily' ? t('rotas.mode.daily', { n: dailyNumber(daily.date) })
+        : challenge ? t('rotas.mode.challenge', { n: challenge.theirs }) : t('rotas.mode.practice');
     routeEl.append(badge, from, nameOf[startId], arrow, to, nameOf[endId]);
     routeEl.setAttribute('aria-label', t('rotas.routeAria', { from: nameOf[startId], to: nameOf[endId] }));
 }
@@ -556,7 +572,7 @@ function renderResult() {
     if (!ended) return;
     $('result-title').textContent = t(ended.won ? 'rotas.win.title' : 'rotas.lose.title');
     const text = $('result-text');
-    const note = [ended.won ? '' : t('rotas.lose.text'), mode === 'daily' ? t('rotas.daily.note') : ''].filter(Boolean);
+    const note = [ended.won ? '' : t('rotas.lose.text'), mode === 'daily' ? t('rotas.daily.note') : '', challengeNote()].filter(Boolean);
     text.textContent = note.join(' ');
     text.classList.toggle('hidden', note.length === 0);
 
@@ -598,6 +614,15 @@ function renderResult() {
     $('share-status').textContent = copied ? t('rotas.res.copied') : '';
 }
 
+// Compara o resultado com o do amigo (menos palpites vence).
+function challengeNote() {
+    if (!challenge || mode === 'daily') return '';
+    const theirs = challenge.theirs;
+    if (!ended.won) return t('rotas.challenge.fail', { theirs });
+    const mine = guesses.length;
+    return t(mine < theirs ? 'rotas.challenge.win' : mine === theirs ? 'rotas.challenge.tie' : 'rotas.challenge.lose', { mine, theirs });
+}
+
 // Texto para colar em conversas: rota, quadradinhos e número de palpites.
 function shareText() {
     const square = { green: '🟩', yellow: '🟨', gray: '⬛' };
@@ -617,7 +642,7 @@ function shareText() {
         t('rotas.res.shareHeader', { from: nameOf[startId], to: nameOf[endId] }),
         marks,
         t('rotas.res.shareLine', { n: guesses.length, ideal: minPath }),
-        siteUrl(),
+        t('rotas.challenge.shareLine', { url: challengeUrl({ c: routeCode, s: guesses.length }) }),
     ].join('\n');
 }
 
@@ -736,14 +761,26 @@ function renderRound() {
 
 function startPractice() {
     mode = 'practice';
+    challenge = null;
     resetRound();
     applyRoute(pickRoute());
+    renderRound();
+}
+
+// Rota de um link de desafio: a mesma do amigo, para comparar o número de palpites.
+function startChallenge(code, theirs) {
+    mode = 'practice';
+    routeCode = code;
+    challenge = { theirs };
+    resetRound();
+    applyRoute(pairFromCode(code));
     renderRound();
 }
 
 // Abre o desafio de hoje, retomando palpites/dicas/resultado se já começou (ou terminou).
 function startDaily() {
     mode = 'daily';
+    challenge = null;
     resetRound();
     daily = loadDaily();
     applyRoute(dailyRoute(daily.date));
@@ -885,7 +922,10 @@ async function init() {
         initSoundToggle();
         initGlobe();
         ready = true;
-        startDaily();
+        const query = new URLSearchParams(location.search);
+        const theirs = parseInt(query.get('s'), 10);
+        if (pairFromCode(query.get('c')) && theirs > 0 && theirs < 100) startChallenge(query.get('c'), theirs);
+        else startDaily();
     } catch (error) {
         console.error(error);
         await initI18n().catch(() => {});

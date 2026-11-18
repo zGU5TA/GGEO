@@ -234,3 +234,15 @@ padrão do navegador e `min(largura/120, altura/67,5)`. Até 1920×1080 nada mud
 acima disso o site inteiro cresce na proporção da tela. Isso só funciona porque
 os tamanhos são em `rem`: ao criar CSS novo, evite `px` para larguras, alturas e
 fontes (bordas finas de 1 a 2 px podem ficar em `px`).
+
+## Desafiar um amigo (links de desafio)
+
+Tudo vai na URL, sem servidor nem conta (`challengeUrl()` em `js/share.js`).
+
+- **Flag, Rush:** `games/flag/?c=<semente em base 36>&r=<região>&s=<pontos do amigo>`. A semente embaralha os países da região (`rushPick`), então os dois veem as mesmas bandeiras na mesma ordem. Quem abre o link cai no menu do Rush com a região travada e o botão "Aceitar o desafio"; no fim vê se venceu, empatou ou perdeu. O compartilhar do Rush já gera o link com a semente e a pontuação.
+- **Rotas, treino:** `games/rotas/?c=<índice>-<0|1>&s=<palpites do amigo>`. O código é o índice do par origem/destino na lista `routePairs` (sempre igual nos mesmos dados) e se origem e destino foram trocados. Menos palpites vence. Se `data/world-borders.json` mudar, links antigos apontam para outra rota.
+- Parâmetros inválidos são ignorados (abre o diário normalmente).
+
+## Dicas do Flag
+
+Diário e Treino mostram capital, continente e população aproximada, sem penalidade (não afetam sequência nem compartilhamento).
