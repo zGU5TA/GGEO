@@ -51,9 +51,23 @@
 
     <main id="conteudo">
         <section class="page hero">
-            <h1>Play the World.</h1>
-            <p data-i18n="home.heroText">Jogos de geografia para testar o que você sabe sobre países, bandeiras e mapas, e descobrir lugares novos.</p>
-            <a class="btn btn-primary" href="#jogos" data-i18n="home.seeGames">Ver jogos</a>
+            <div class="hero__copy">
+                <h1>Play the World.</h1>
+                <p data-i18n="home.heroText">Jogos de geografia para testar o que você sabe sobre países, bandeiras e mapas, e descobrir lugares novos.</p>
+                <a class="btn btn-primary" href="#jogos" data-i18n="home.seeGames">Ver jogos</a>
+            </div>
+
+            <!-- Globo 3D decorativo, desenhado por js/globe.js (escondido de leitores de tela).
+                 O anel com marcas é só enfeite cartográfico. Sem JavaScript, aparece a logo parada. -->
+            <div class="hero__visual" aria-hidden="true">
+                <svg class="hero__bezel" viewBox="0 0 100 100" focusable="false">
+                    <circle class="hero__bezel-ring" cx="50" cy="50" r="46.4" />
+                    <circle class="hero__bezel-ticks" cx="50" cy="50" r="48.2" pathLength="360" />
+                    <circle class="hero__bezel-ticks hero__bezel-major" cx="50" cy="50" r="48.2" pathLength="360" />
+                </svg>
+                <canvas class="hero__globe" data-globe></canvas>
+                <noscript><img class="hero__fallback" src="assets/logo-globe.svg" alt="" width="600" height="600"></noscript>
+            </div>
         </section>
 
         <section class="page section" id="jogos" aria-labelledby="jogos-titulo">
@@ -83,5 +97,6 @@
 
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/feedback.js"></script>
+    <script type="module" src="js/globe.js"></script>
 </body>
 </html>

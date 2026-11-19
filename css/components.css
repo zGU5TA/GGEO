@@ -4,11 +4,23 @@
    Cores e formas vêm das variáveis de css/main.css.
    ============================================================= */
 
+/* Cantos arredondados só dos cartões e botões da home, como nas imagens de
+   compartilhamento. O resto do site segue com --radius (reto), definido em main.css. */
+:root {
+    --radius-card: 1rem;
+    --radius-control: 0.65rem;
+}
+
 /* ---------- Layout ---------- */
 
 .page {
-    width: min(100% - 2rem, 64rem);
+    width: min(100% - 2rem, 80rem);
     margin-inline: auto;
+}
+
+/* Brilhos decorativos do Hero passam um pouco da largura da página; isto evita barra de rolagem lateral. */
+main {
+    overflow-x: clip;
 }
 
 .skip-link {
@@ -127,11 +139,62 @@
 
 /* ---------- Início (hero) ---------- */
 
+/* Duas colunas no computador (texto à esquerda, globo 3D à direita); no celular,
+   texto primeiro e globo logo abaixo. */
 .hero {
-    padding-block: clamp(3rem, 10vw, 6rem);
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    padding-block: clamp(2rem, 5vw, 4rem);
 }
 
+@media (min-width: 56rem) {
+    .hero {
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+}
+
+/* Textura cartográfica: marcas de registro em "+" (como nos cantos de um mapa impresso),
+   que somem longe do globo. A cor vai dentro da imagem, então há uma versão para cada tema. */
 .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cpath d='M32 27v10M27 32h10' fill='none' stroke='%23E6D4BF' stroke-opacity='.28'/%3E%3C/svg%3E");
+    background-size: 4rem 4rem;
+    -webkit-mask-image: radial-gradient(ellipse 55% 70% at 74% 50%, #000, transparent);
+    mask-image: radial-gradient(ellipse 55% 70% at 74% 50%, #000, transparent);
+}
+
+:root[data-theme="light"] .hero::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cpath d='M32 27v10M27 32h10' fill='none' stroke='%23000' stroke-opacity='.26'/%3E%3C/svg%3E");
+}
+
+/* Iluminação ambiente: brilho laranja suave atrás do globo. */
+.hero::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    top: 50%;
+    right: -4%;
+    width: min(50rem, 100%);
+    aspect-ratio: 1;
+    translate: 0 -50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 15%, transparent), transparent);
+}
+
+/* No bege o laranja pesa mais; o brilho fica mais fraco. */
+:root[data-theme="light"] .hero::after {
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 9%, transparent), transparent);
+}
+
+.hero__copy::before {
     content: "";
     display: block;
     width: 4rem;
@@ -142,41 +205,205 @@
 
 .hero h1 {
     margin: 0 0 1rem;
-    font-size: clamp(2.5rem, 9vw, 5rem);
+    font-size: clamp(2.5rem, 7vw, 5.25rem);
     line-height: 1.05;
     letter-spacing: -0.02em;
 }
 
 .hero p {
-    max-width: 38rem;
+    max-width: 34rem;
     margin: 0 0 1.75rem;
     color: var(--muted);
     font-size: 1.125rem;
+}
+
+.hero .btn-primary {
+    padding: 0.8rem 1.6rem;
+    border-radius: var(--radius-control);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.hero .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.6rem 1.8rem -0.6rem color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+/* Globo e anel. O canvas é desenhado por js/globe.js e entra com um fade. */
+.hero__visual {
+    position: relative;
+    justify-self: center;
+    width: min(100%, 30rem);
+    aspect-ratio: 1;
+}
+
+/* No computador o globo é grande, mas limitado pela altura da tela: assim o começo da
+   seção de jogos já aparece logo abaixo. */
+@media (min-width: 56rem) {
+    .hero__visual {
+        justify-self: end;
+        width: min(100%, 44rem, 70vh);
+    }
+}
+
+.hero__globe,
+.hero__bezel,
+.hero__fallback {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.hero__fallback {
+    inset: 8%;
+    width: 84%;
+    height: 84%;
+}
+
+.hero__globe {
+    opacity: 0;
+    transition: opacity 0.9s ease;
+}
+
+.hero__visual.is-ready .hero__globe {
+    opacity: 1;
+}
+
+/* Anel com marcas de graus ao redor do globo: gira bem devagar. */
+.hero__bezel {
+    color: var(--fg);
+    animation: hero-bezel 240s linear infinite;
+}
+
+.hero__bezel circle {
+    fill: none;
+    stroke: currentColor;
+}
+
+.hero__bezel-ring {
+    stroke-opacity: 0.16;
+    stroke-width: 0.15;
+}
+
+.hero__bezel-ticks {
+    stroke-opacity: 0.3;
+    stroke-width: 1.4;
+    stroke-dasharray: 0.45 4.55;
+}
+
+.hero__bezel-major {
+    stroke-opacity: 0.55;
+    stroke-width: 2.8;
+    stroke-dasharray: 0.6 29.4;
+}
+
+@keyframes hero-bezel {
+    to { transform: rotate(360deg); }
 }
 
 /* ---------- Catálogo ---------- */
 
 .catalog {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+    gap: 1.25rem;
 }
 
+/* Cartão no estilo das imagens de compartilhamento: painel translúcido com contorno
+   fino. No hover (ou foco por teclado) o contorno vira laranja e uma luz suave
+   aparece no canto superior. */
 .game-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 1.25rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
+    padding: 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--fg) 5%, transparent);
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
-.game-card:hover {
-    border-color: var(--accent);
+
+.game-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 62%);
+    transition: opacity 0.35s ease;
+}
+
+.game-card:focus-within {
+    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.game-card:focus-within::before {
+    opacity: 1;
+}
+
+/* O levantar do cartão só no que tem mouse de verdade (no toque o :hover "gruda"). */
+@media (hover: hover) {
+    .game-card:hover {
+        border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+        background: color-mix(in srgb, var(--fg) 7%, transparent);
+        box-shadow:
+            0 1.25rem 2.5rem -1.5rem color-mix(in srgb, var(--accent) 50%, transparent),
+            0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+        transform: translateY(-3px);
+    }
+    .game-card:hover::before {
+        opacity: 1;
+    }
+    .game-card:hover .game-card__icon {
+        color: var(--accent);
+        transform: scale(1.08);
+    }
 }
 
 .game-card__icon {
     color: var(--fg);
+    transform-origin: left center;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+/* No tema claro o laranja sobre o bege fica fraco; o ícone segue na cor do texto. */
+:root[data-theme="light"] .game-card:hover .game-card__icon {
+    color: var(--fg);
+}
+
+.game-card .btn-primary {
+    border-radius: var(--radius-control);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+.game-card .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.5rem 1.4rem -0.5rem color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+/* Quem prefere menos movimento fica sem o anel girando e sem os "levantares". */
+@media (prefers-reduced-motion: reduce) {
+    .hero__bezel {
+        animation: none;
+    }
+    .hero__globe,
+    .game-card,
+    .game-card::before,
+    .game-card__icon,
+    .hero .btn-primary,
+    .game-card .btn-primary {
+        transition: none;
+    }
+    .game-card:hover,
+    .game-card:hover .game-card__icon,
+    .hero .btn-primary:hover,
+    .game-card .btn-primary:hover {
+        transform: none;
+    }
 }
 
 .game-card__body {

@@ -21,7 +21,7 @@ site fica numa subpasta (GitHub Pages de projeto).
 | Pasta | Conteúdo | Quem usa |
 |-------|----------|----------|
 | `css/` | paleta, componentes da plataforma e `game-shell.css` (esqueleto comum dos jogos) | todas as páginas / jogos |
-| `js/` | tema, idioma, fonte, catálogo e ponto de entrada da home | home (`theme.js`, `lang.js`, `font.js` e `i18n.js` também nos jogos) |
+| `js/` | tema, idioma, fonte, catálogo, ponto de entrada da home e o globo 3D do Hero (`globe.js`, dados gerados em `globe-data.js` por `tools/make-globe-data.js`) | home (`theme.js`, `lang.js`, `font.js` e `i18n.js` também nos jogos) |
 | `i18n/` | textos de cada idioma (`pt.json`, `en.json`, `es.json`, `zh.json`) | todas as páginas |
 | `data/` | dados compartilhados entre jogos | jogos |
 | `games/<id>/` | um jogo completo e independente | só o próprio jogo |
