@@ -30,6 +30,13 @@
     --muted: color-mix(in srgb, var(--fg) 68%, var(--bg));
     --input-bg: var(--bg);
 
+    /* Acessibilidade (WCAG 1.4.11): contorno de controles precisa de pelo menos 3:1
+       contra o fundo. --border (28%) continua para divisórias e enfeites; controles
+       interativos (campos, botões, seletores) usam --border-control. */
+    --border-control: color-mix(in srgb, var(--fg) 55%, var(--bg));
+    /* Laranja usado como TEXTO, borda ou indicador. No tema escuro é o próprio laranja. */
+    --accent-ink: var(--accent);
+
     /* Cores funcionais (certo/errado), independentes da marca */
     --success: #2e7d32;
     --error: #c62828;
@@ -47,6 +54,10 @@
 
     --bg: var(--ggeo-beige);
     --fg: var(--ggeo-black);
+
+    /* O laranja do tema claro tem só 2,4:1 sobre o bege: serve de fundo de botão
+       (texto preto por cima), mas não de texto/borda. Esta versão escurecida dá 4,9:1. */
+    --accent-ink: color-mix(in srgb, var(--ggeo-orange) 65%, #000);
 }
 
 /* ---------- Base ---------- */
@@ -101,9 +112,9 @@ html.i18n-loading body {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     padding-inline: 0.6rem 0.3rem;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-control);
     border-radius: var(--radius);
     background: var(--surface);
     color: var(--fg);
@@ -115,6 +126,7 @@ html.i18n-loading body {
 }
 
 .lang-picker select {
+    align-self: stretch; /* o seletor ocupa a altura toda: a área clicável fica de 44px */
     border: 0;
     background: transparent;
     color: inherit;
@@ -143,6 +155,10 @@ html.i18n-loading body {
     color: var(--muted);
     text-decoration: underline;
     cursor: pointer;
+    /* área de toque de ~44px sem mexer no layout (o padding é cancelado pela margem negativa) */
+    display: inline-block;
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
 }
 
 .feedback-link:hover {

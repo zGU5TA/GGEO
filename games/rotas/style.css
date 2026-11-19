@@ -190,7 +190,8 @@ body {
     font-size: 0.85em;
     color: var(--fg);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-control);
+    min-height: 2.75rem;
     cursor: pointer;
 }
 .hint-btn:hover:not(:disabled) { border-color: var(--fg); }
@@ -248,13 +249,13 @@ body {
     right: 0.6rem;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-control);
     background: var(--surface);
     z-index: 4;
 }
 .map-controls button {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     font: inherit;
     font-size: 1.1rem;
     font-weight: bold;
