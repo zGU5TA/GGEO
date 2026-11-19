@@ -4,13 +4,6 @@
    Cores e formas vêm das variáveis de css/main.css.
    ============================================================= */
 
-/* Cantos arredondados só dos cartões e botões da home, como nas imagens de
-   compartilhamento. O resto do site segue com --radius (reto), definido em main.css. */
-:root {
-    --radius-card: 1rem;
-    --radius-control: 0.65rem;
-}
-
 /* ---------- Layout ---------- */
 
 .page {
@@ -92,7 +85,7 @@ main {
     border-bottom: 2px solid transparent;
 }
 .nav a:hover {
-    border-bottom-color: var(--accent);
+    border-bottom-color: var(--accent-ink);
 }
 
 /* ---------- Botões ---------- */
@@ -140,7 +133,7 @@ main {
     cursor: pointer;
 }
 .icon-btn:hover {
-    border-color: var(--accent);
+    border-color: var(--accent-ink);
 }
 
 /* ---------- Início (hero) ---------- */
@@ -225,7 +218,7 @@ main {
 
 .hero .btn-primary {
     padding: 0.8rem 1.6rem;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius);
     transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 
@@ -327,7 +320,7 @@ main {
     gap: 1rem;
     padding: 1.5rem;
     border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
-    border-radius: var(--radius-card);
+    border-radius: var(--radius);
     background: color-mix(in srgb, var(--fg) 5%, transparent);
     transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
@@ -344,7 +337,7 @@ main {
 }
 
 .game-card:focus-within {
-    border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+    border-color: color-mix(in srgb, var(--accent-ink) 70%, transparent);
     background: color-mix(in srgb, var(--fg) 7%, transparent);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
 }
@@ -355,7 +348,7 @@ main {
 /* O levantar do cartão só no que tem mouse de verdade (no toque o :hover "gruda"). */
 @media (hover: hover) {
     .game-card:hover {
-        border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+        border-color: color-mix(in srgb, var(--accent-ink) 70%, transparent);
         background: color-mix(in srgb, var(--fg) 7%, transparent);
         box-shadow:
             0 1.25rem 2.5rem -1.5rem color-mix(in srgb, var(--accent) 50%, transparent),
@@ -383,7 +376,7 @@ main {
 }
 
 .game-card .btn-primary {
-    border-radius: var(--radius-control);
+    border-radius: var(--radius);
     transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 .game-card .btn-primary:hover {
@@ -446,8 +439,7 @@ main {
     content: "";
     width: 0.6rem;
     height: 0.6rem;
-    border-radius: 50%;
-    background: var(--secondary); /* verde só como detalhe, nunca como fundo de texto */
+    background: var(--secondary); /* quadradinho, como os pixels da logo */ /* verde só como detalhe, nunca como fundo de texto */
 }
 .badge--soon::before {
     background: var(--muted);

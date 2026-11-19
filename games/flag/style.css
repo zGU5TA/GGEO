@@ -222,7 +222,7 @@
 .share-status { margin: 0.5rem 0 0; font-size: 0.85em; color: var(--muted); min-height: 1.2em; }
 
 /* Textos longos de botão (dica) quebram em duas linhas em vez de alargar a tela */
-#hint-btn { white-space: normal; min-height: 2.75rem; } /* o padding vem inline no HTML; o mínimo garante 44px de toque */
+#hint-btn { white-space: normal; min-height: 2.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; } /* o padding vem inline no HTML; o mínimo garante 44px de toque */
 
 /* Desafio diário: bandeira escondida + lista de palpites */
 .flag-container:has(.flag-canvas:not(.hidden)) { height: auto; min-height: 11.875rem; padding: 0.5rem; }

@@ -8,7 +8,8 @@
  * Como usar numa página:
  *   <script src="js/theme.js"></script>              (no <head>)
  *   <button data-theme-toggle>...</button>           (qualquer botão)
- * O botão é ligado sozinho; o ícone dele é atualizado aqui (o rótulo falado, por js/i18n.js).
+ * O botão é ligado sozinho. O ícone (lua/sol) é trocado só pelo CSS, conforme o tema;
+ * o rótulo falado vem de js/i18n.js.
  */
 (function () {
     var KEY = 'ggeo_theme';
@@ -32,20 +33,10 @@
         try { localStorage.setItem(KEY, theme); } catch (error) { /* sem persistência */ }
     }
 
-    function updateButtons(theme) {
-        // Só o ícone: o rótulo falado ("Mudar para o tema claro...") depende do
-        // idioma e é colocado por js/i18n.js.
-        var buttons = document.querySelectorAll('[data-theme-toggle]');
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].textContent = theme === 'dark' ? '🌙' : '☀️';
-        }
-    }
-
     function apply(theme) {
         var root = document.documentElement;
         root.setAttribute('data-theme', theme);
         root.style.colorScheme = theme; // faz campos e barras de rolagem acompanharem o tema
-        updateButtons(theme);
         // Avisa quem precisar reagir ao tema (js/i18n.js atualiza o rótulo do botão).
         document.dispatchEvent(new CustomEvent('ggeo:themechange', { detail: theme }));
     }
@@ -57,7 +48,6 @@
     apply(readStored() || DEFAULT_THEME);
 
     document.addEventListener('DOMContentLoaded', function () {
-        updateButtons(current());
         var buttons = document.querySelectorAll('[data-theme-toggle]');
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].addEventListener('click', function () {

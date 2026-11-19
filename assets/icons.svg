@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Ícones da interface da GGEO (sprite). Grade 24×24, traço de 1,75, pontas retas:
+       o mesmo desenho dos ícones dos cartões (js/games.js). A cor e a espessura vêm
+       do CSS (.icon em css/main.css), então cada ícone acompanha o tema.
+       Uso: <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#globe"/></svg> -->
+  <symbol id="globe" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>
+  </symbol>
+  <symbol id="moon" viewBox="0 0 24 24">
+    <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>
+  </symbol>
+  <symbol id="sun" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>
+  </symbol>
+  <symbol id="settings" viewBox="0 0 24 24">
+    <path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h10M18 17h2"/>
+    <rect x="14" y="5" width="4" height="4"/><rect x="8" y="10" width="4" height="4"/><rect x="14" y="15" width="4" height="4"/>
+  </symbol>
+  <symbol id="bulb" viewBox="0 0 24 24">
+    <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>
+  </symbol>
+  <symbol id="recenter" viewBox="0 0 24 24">
+    <path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><rect x="9" y="9" width="6" height="6"/>
+  </symbol>
+</svg>

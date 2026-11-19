@@ -57,7 +57,7 @@
   "flag.loading": "Loading flag...",
   "flag.imageError": "Error loading image.",
   "flag.flagAlt": "Mystery flag",
-  "flag.hintButton": "💡 Show hint",
+  "flag.hintButton": "Show hint",
   "flag.hintLabel": "Hint:",
   "flag.hintBody": "Capital: {capital} | Continent: {continent} | Population: ≈ {population}",
   "flag.placeholder": "Type the country name...",

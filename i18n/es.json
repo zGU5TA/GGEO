@@ -57,7 +57,7 @@
   "flag.loading": "Cargando bandera...",
   "flag.imageError": "Error al cargar la imagen.",
   "flag.flagAlt": "Bandera misteriosa",
-  "flag.hintButton": "💡 Mostrar pista",
+  "flag.hintButton": "Mostrar pista",
   "flag.hintLabel": "Pista:",
   "flag.hintBody": "Capital: {capital} | Continente: {continent} | Población: ≈ {population}",
   "flag.placeholder": "Escribe el nombre del país...",

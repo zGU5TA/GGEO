@@ -41,9 +41,9 @@
                 <h1>Flag</h1>
             </div>
         <div class="top-controls">
-            <div class="lang-picker"><span aria-hidden="true">🌐</span><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
-            <button class="icon-btn" id="theme-toggle" data-theme-toggle>🌙</button>
-            <button class="icon-btn" id="settings-btn" data-i18n-attr="title:settings.title; aria-label:settings.title" title="Configurações" aria-label="Configurações">⚙️</button>
+            <div class="lang-picker"><svg class="icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#globe"/></svg><select data-lang-select data-i18n-attr="aria-label:lang.label" aria-label="Idioma"></select></div>
+            <button class="icon-btn" id="theme-toggle" data-theme-toggle><svg class="icon icon--moon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#moon"/></svg><svg class="icon icon--sun" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#sun"/></svg></button>
+            <button class="icon-btn" id="settings-btn" data-i18n-attr="title:settings.title; aria-label:settings.title" title="Configurações" aria-label="Configurações"><svg class="icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#settings"/></svg></button>
         </div>
         </div>
 
@@ -112,7 +112,7 @@
             <p id="reveal-caption" class="reveal-caption" data-i18n="flag.reveal.caption">Cada palpite revela as partes da bandeira que têm a mesma cor.</p>
             <ol id="guess-list" class="guess-list" aria-label="Palpites"></ol>
 
-            <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn" data-i18n="flag.hintButton">💡 Mostrar dica</button>
+            <button class="btn-primary" style="padding: 0.4rem; font-size: 0.85em; margin-bottom: 0.75rem;" id="hint-btn"><svg class="icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#bulb"/></svg><span data-i18n="flag.hintButton">Mostrar dica</span></button>
             <div id="hint-box" class="hint-box" aria-live="polite"></div>
 
             <div id="game-area">

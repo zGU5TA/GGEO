@@ -57,7 +57,7 @@
   "flag.loading": "正在加载国旗...",
   "flag.imageError": "图片加载失败。",
   "flag.flagAlt": "神秘国旗",
-  "flag.hintButton": "💡 显示提示",
+  "flag.hintButton": "显示提示",
   "flag.hintLabel": "提示：",
   "flag.hintBody": "首都：{capital} | 大洲：{continent} | 人口：约 {population}",
   "flag.placeholder": "输入国家名称...",
