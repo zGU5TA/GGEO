@@ -108,6 +108,20 @@ html.i18n-loading body {
     visibility: hidden;
 }
 
+/* ---------- Marca do globo (assets/logo-mark.svg) ---------- */
+/* O desenho é o mesmo do favicon, usado como máscara: a cor segue o laranja do tema
+   (#FF7700 no escuro, #C4761D no claro). Decorativa: o nome "GGEO" fica em texto ao lado. */
+
+.brand-mark {
+    display: inline-block;
+    flex: none;
+    width: 1.6em;
+    height: 1.6em;
+    background: var(--accent);
+    -webkit-mask: url("../assets/logo-mark.svg") center / contain no-repeat;
+    mask: url("../assets/logo-mark.svg") center / contain no-repeat;
+}
+
 /* ---------- Ícones (sprite em assets/icons.svg) ---------- */
 /* Mesmo traço dos ícones dos cartões. O tamanho acompanha a fonte do botão. */
 

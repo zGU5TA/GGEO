@@ -38,8 +38,8 @@
 
     <header class="site-header">
         <div class="page site-header__inner">
-            <!-- Logotipo provisório em texto. O logotipo oficial entra aqui depois. -->
-            <a class="wordmark" href="index.html" data-i18n-attr="aria-label:nav.homeAria" aria-label="GGEO, página inicial">GGEO</a>
+            <!-- Marca do globo + nome em texto (a marca é desenhada por CSS, veja .brand-mark). -->
+            <a class="wordmark" href="index.html" data-i18n-attr="aria-label:nav.homeAria" aria-label="GGEO, página inicial"><span class="brand-mark" aria-hidden="true"></span>GGEO</a>
             <nav class="nav" data-i18n-attr="aria-label:nav.main" aria-label="Principal">
                 <a href="#jogos" data-i18n="nav.games">Jogos</a>
                 <a href="#sobre" data-i18n="nav.about">Sobre</a>
@@ -91,7 +91,7 @@
     <footer class="site-footer">
         <div class="page site-footer__row">
             <span>GGEO — Play the World.</span>
-            <a class="feedback-link" data-feedback data-i18n="feedback.link">Enviar feedback</a>
+            <span class="site-footer__feedback"><a class="feedback-link" data-feedback data-i18n="feedback.link">Enviar feedback</a></span>
         </div>
     </footer>
 

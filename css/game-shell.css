@@ -269,7 +269,8 @@ p.subtitle {
 }
 
 .topbar-title h1 { margin: 0; font-size: 1.6em; }
-.topbar-title .back-platform { margin: -0.75rem 0; }
+.topbar-title .back-platform { margin: -0.75rem 0; display: inline-flex; align-items: center; gap: 0.4rem; }
+.back-platform .brand-mark { width: 1.9em; height: 1.9em; }
 .topbar-title .subtitle { margin: 0; }
 
 .topbar .top-controls {

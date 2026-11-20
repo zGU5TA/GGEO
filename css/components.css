@@ -59,6 +59,7 @@ main {
 .wordmark {
     display: inline-flex;
     align-items: center;
+    gap: 0.5rem;
     min-height: 2.75rem;
     color: var(--fg);
     font-size: 1.6rem;
@@ -467,6 +468,8 @@ main {
 }
 
 /* ---------- Link de feedback ---------- */
+
+.site-footer__feedback { white-space: normal; }
 
 .site-footer__row {
     display: flex;
