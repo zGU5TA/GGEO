@@ -44,7 +44,10 @@
     /* Forma e tipografia */
     --radius: 0;
     --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "Courier New", Courier, monospace;
+    /* Dois papéis de fonte: sans para interface e leitura; mono só para dados
+       (contadores, coordenadas, porcentagens, rótulos e metadados). Só fontes do
+       sistema: nada para baixar. Textos em mandarim caem na fonte chinesa do sistema. */
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 /* Paleta — tema claro. Só muda o que a imagem da marca diferencia. */

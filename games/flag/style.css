@@ -23,9 +23,18 @@
     color: var(--muted);
 }
 
+.stats-container {
+    font-family: var(--font-mono); /* contadores = dados */
+}
+
 .stats-container span {
     color: var(--fg);
     font-weight: bold;
+}
+
+.guess-percent,
+.menu-section label {
+    font-family: var(--font-mono);
 }
 
 .timer-bar-container {
@@ -177,10 +186,12 @@
 
 .mode-tab:hover { color: var(--fg); border-color: var(--fg); }
 
+/* Aba escolhida: preenchida com a cor do texto (preto/bege). O laranja fica
+   reservado para a ação principal da tela. */
 .mode-tab[aria-pressed="true"] {
-    color: var(--on-accent, #000);
-    background: var(--accent);
-    border-color: var(--accent);
+    color: var(--bg);
+    background: var(--fg);
+    border-color: var(--fg);
 }
 
 .mode-desc {
@@ -222,7 +233,7 @@
 .share-status { margin: 0.5rem 0 0; font-size: 0.85em; color: var(--muted); min-height: 1.2em; }
 
 /* Textos longos de botão (dica) quebram em duas linhas em vez de alargar a tela */
-#hint-btn { white-space: normal; min-height: 2.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; } /* o padding vem inline no HTML; o mínimo garante 44px de toque */
+#hint-btn { white-space: normal; min-height: 2.75rem; display: flex; align-items: center; justify-content: center; margin: 0 0 0.75rem; font-size: 0.85em; } /* o padding vem inline no HTML; o mínimo garante 44px de toque */
 
 /* Desafio diário: bandeira escondida + lista de palpites */
 .flag-container:has(.flag-canvas:not(.hidden)) { height: auto; min-height: 11.875rem; padding: 0.5rem; }

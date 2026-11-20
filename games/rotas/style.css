@@ -112,6 +112,13 @@ body {
 
 /* ---------- Palpites ---------- */
 
+.section-title,
+.mode-badge,
+.legend,
+.result-stats dd {
+    font-family: var(--font-mono); /* rótulos pequenos e dados */
+}
+
 .section-title {
     margin: 0 0 0.5rem;
     font-size: 0.8em;
@@ -195,7 +202,8 @@ body {
     cursor: pointer;
 }
 .hint-btn:hover:not(:disabled) { border-color: var(--fg); }
-.hint-btn:disabled { opacity: 0.45; cursor: default; }
+/* Dica ainda bloqueada: tracejada e sem apagar o texto (antes parecia um erro). */
+.hint-btn:disabled { color: var(--muted); border-style: dashed; cursor: not-allowed; }
 .hint-btn.used { opacity: 0.6; }
 .hint-note { margin: 0; font-size: 0.8em; color: var(--muted); }
 

@@ -18,7 +18,7 @@
 :root[data-font="xlarge"] { --base-font-size: 1.35rem; }
 
 body {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     background-color: var(--bg);
     color: var(--fg);
     margin: 0;
@@ -289,6 +289,17 @@ p.subtitle {
     .container { padding: 1.25rem; }
 }
 
+/* ---------- Papéis tipográficos ----------
+   Interface e leitura em sans (herdada do body). Fonte mono só para dados e
+   metadados: contadores, porcentagens, rótulos pequenos e o "voltar". Os
+   selectors específicos de cada jogo ficam no style.css dele. */
+
+.back-platform,
+p.subtitle,
+.feedback-address {
+    font-family: var(--font-mono);
+}
+
 /* ---------- Botão secundário (compartilhar, etc.) ---------- */
 
 .secondary-btn {
@@ -303,6 +314,7 @@ p.subtitle {
     cursor: pointer;
 }
 .secondary-btn:hover { border-color: var(--fg); }
+.secondary-btn .icon { margin-inline-end: 0.5rem; }
 
 @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
