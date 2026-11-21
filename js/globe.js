@@ -114,6 +114,10 @@ export function initGlobe(canvas) {
     let styles = null;
     let theta = START_LON * DEG;
     let frameId = 0, lastTime = 0, onScreen = true;
+    // Girando ou parado: começa pelo que o sistema pede (movimento reduzido = parado),
+    // mas a pessoa pode mudar com o botão de pausa/retomar.
+    let spinning = !reduceMotion.matches;
+    const toggle = document.querySelector('[data-globe-toggle]');
 
     // Reaproveitados a cada quadro (evita criar objetos 60 vezes por segundo).
     const px = new Float32Array(cells.length * 4);
@@ -265,7 +269,7 @@ export function initGlobe(canvas) {
     }
 
     function start() {
-        if (frameId || !onScreen || document.hidden || reduceMotion.matches) return;
+        if (frameId || !onScreen || document.hidden || !spinning) return;
         lastTime = performance.now();
         frameId = requestAnimationFrame(tick);
     }
@@ -281,7 +285,19 @@ export function initGlobe(canvas) {
         onScreen ? start() : stop();
     }).observe(canvas);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
-    reduceMotion.addEventListener('change', () => { if (reduceMotion.matches) { stop(); draw(); } else start(); });
+    function setSpinning(value) {
+        spinning = value;
+        if (toggle) toggle.setAttribute('aria-pressed', String(spinning));
+        canvas.parentElement?.classList.toggle('is-paused', !spinning); // o anel também para
+        if (spinning) start(); else { stop(); draw(); }
+    }
+    reduceMotion.addEventListener('change', () => setSpinning(!reduceMotion.matches));
+    if (toggle) {
+        toggle.hidden = false;
+        toggle.setAttribute('aria-pressed', String(spinning));
+        canvas.parentElement?.classList.toggle('is-paused', !spinning);
+        toggle.addEventListener('click', () => setSpinning(!spinning));
+    }
     document.addEventListener('ggeo:themechange', () => {
         theme = readTheme();
         if (size) { buildStyles(); draw(); }

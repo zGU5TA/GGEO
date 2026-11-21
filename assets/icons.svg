@@ -23,4 +23,10 @@
   <symbol id="recenter" viewBox="0 0 24 24">
     <path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><rect x="9" y="9" width="6" height="6"/>
   </symbol>
+  <symbol id="pause" viewBox="0 0 24 24">
+    <rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>
+  </symbol>
+  <symbol id="play" viewBox="0 0 24 24">
+    <path d="M7 4.5v15l12-7.5z"/>
+  </symbol>
 </svg>

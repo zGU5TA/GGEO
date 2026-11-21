@@ -52,20 +52,22 @@
     <main id="conteudo">
         <section class="page hero">
             <div class="hero__copy">
-                <h1>Play the World.</h1>
+                <h1 data-i18n="home.heroTitle">Play the World.</h1>
                 <p data-i18n="home.heroText">Jogos de geografia para testar o que você sabe sobre países, bandeiras e mapas, e descobrir lugares novos.</p>
                 <a class="btn btn-primary" href="#jogos" data-i18n="home.seeGames">Ver jogos</a>
             </div>
 
             <!-- Globo 3D decorativo, desenhado por js/globe.js (escondido de leitores de tela).
-                 O anel com marcas é só enfeite cartográfico. Sem JavaScript, aparece a logo parada. -->
-            <div class="hero__visual" aria-hidden="true">
-                <svg class="hero__bezel" viewBox="0 0 100 100" focusable="false">
+                 O anel com marcas é só enfeite cartográfico. Sem JavaScript, aparece a logo parada.
+                 O botão de pausa só aparece quando o globo está ativo (js/globe.js o libera). -->
+            <div class="hero__visual">
+                <svg class="hero__bezel" viewBox="0 0 100 100" focusable="false" aria-hidden="true">
                     <circle class="hero__bezel-ring" cx="50" cy="50" r="46.4" />
                     <circle class="hero__bezel-ticks" cx="50" cy="50" r="48.2" pathLength="360" />
                     <circle class="hero__bezel-ticks hero__bezel-major" cx="50" cy="50" r="48.2" pathLength="360" />
                 </svg>
-                <canvas class="hero__globe" data-globe></canvas>
+                <canvas class="hero__globe" data-globe aria-hidden="true"></canvas>
+                <button class="icon-btn hero__motion" type="button" data-globe-toggle hidden aria-pressed="true" data-i18n-attr="aria-label:globe.rotate; title:globe.rotate" aria-label="Girar o globo" title="Girar o globo"><svg class="icon icon--pause" aria-hidden="true" focusable="false"><use href="assets/icons.svg#pause"/></svg><svg class="icon icon--play" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"/></svg></button>
                 <noscript><img class="hero__fallback" src="assets/logo-globe.svg" alt="" width="600" height="600"></noscript>
             </div>
         </section>
@@ -90,7 +92,7 @@
 
     <footer class="site-footer">
         <div class="page site-footer__row">
-            <span>GGEO — Play the World.</span>
+            <span data-i18n="footer.tagline">GGEO — Play the World.</span>
             <span class="site-footer__feedback"><a class="feedback-link" data-feedback data-i18n="feedback.link">Enviar feedback</a></span>
         </div>
     </footer>
