@@ -3,6 +3,7 @@ import { countryName, capitalName, matchesCountry, acceptedAnswers } from '../..
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
 import { copyText, siteUrl, challengeUrl } from '../../js/share.js';
+import { openShareDialog } from '../../js/share-card.js';
 import { analyzeFlag, overlap, fraction, addMask, drawRevealed, drawFull, animateReveal } from './reveal.js';
 
 // A lista de países fica em data/countries.json, compartilhada entre os jogos.
@@ -123,6 +124,7 @@ const endText = document.getElementById('end-text');
 const endExtra = document.getElementById('end-extra');
 const endAgainBtn = document.getElementById('end-again-btn');
 const shareBtn = document.getElementById('share-btn');
+const shareImageBtn = document.getElementById('share-image-btn');
 const shareStatus = document.getElementById('share-status');
 const flagCanvas = document.getElementById('flag-canvas');
 const guessList = document.getElementById('guess-list');
@@ -387,6 +389,7 @@ function setPlayLayout(which) {
     show(guessList, reveal);
     show(revealCaption, reveal);
     show(shareBtn, true);
+    show(shareImageBtn, false);
     show(backBtn, which !== 'daily');       // no diário o botão só aparece quando termina (veja showRevealEnd)
     if (reveal) { flagImg.style.display = 'none'; loader.style.display = 'none'; }
     else { flagCanvas.getContext('2d').clearRect(0, 0, flagCanvas.width, flagCanvas.height); }
@@ -474,7 +477,7 @@ function showHint() {
 // ---------------------------------------------------------------------------
 
 const rush = { active: false, started: false, endsAt: 0, score: 0, next: null, newRecord: false, previous: 0,
-    seed: 0, order: [], index: 0, challenge: null };
+    seed: 0, order: [], index: 0, challenge: null, hits: [], errors: 0 };
 
 // A sequência de bandeiras de cada Rush vem de uma semente: com a mesma semente e a mesma região,
 // duas pessoas veem as mesmas bandeiras na mesma ordem (é o que torna o desafio justo).
@@ -502,6 +505,8 @@ function startRush() {
     rush.active = true;
     rush.started = false;      // o relógio só começa quando a primeira bandeira aparece
     rush.score = 0;
+    rush.hits = [];          // bandeiras acertadas, em ordem (para a imagem de compartilhar)
+    rush.errors = 0;         // erros e puladas
     rush.next = null;
     rush.newRecord = false;
     score = 0;
@@ -552,12 +557,14 @@ function rushGuess() {
         playSound('success');
         rememberCorrect(answered);
         rush.score++;
+        rush.hits.push(answered);
         score = rush.score;
         scoreSpan.textContent = score;
         setMessage({ key: 'flag.rush.correct', country: answered }, 'success');
     } else {
         // Errar não encerra nem tira pontos: só não pontua, e segue para a próxima.
         playSound('error');
+        rush.errors++;
         setMessage({ key: 'flag.rush.wrong', country: answered }, 'error');
         guessInput.classList.add('shake');
         setTimeout(() => guessInput.classList.remove('shake'), 300);
@@ -568,6 +575,7 @@ function rushGuess() {
 function rushSkip() {
     if (!rush.active) return;
     playSound('click');
+    rush.errors++;
     setMessage({ key: 'flag.rush.skipped', country: currentCountry }, 'error');
     rushAdvance();
     guessInput.focus();
@@ -596,6 +604,7 @@ function endRush() {
     show(hintBtn, false);
     show(skipBtn, false);
     show(endAgainBtn, true);
+    show(shareImageBtn, rush.score > 0);
     setMessage(null);
     renderEnd();
     show(endPanel, true);
@@ -878,6 +887,21 @@ function shareText() {
     ].join('\n');
 }
 
+// Imagem 9:16 do Rush (janela com prévia e escolha de layout; veja js/share-card.js).
+function shareImage() {
+    playSound('click');
+    openShareDialog({
+        kind: 'rush',
+        fileName: 'ggeo-flag-rush',
+        data: {
+            hits: rush.score,
+            errors: rush.errors,
+            record: Math.max(rush.previous, rush.score),
+            flags: rush.hits.map(flagUrl),
+        },
+    });
+}
+
 async function shareResult() {
     const ok = await copyText(shareText());
     playSound('click');
@@ -947,6 +971,7 @@ skipBtn.addEventListener('click', rushSkip);
 guessBtn.addEventListener('click', handleAction);
 nextBtn.addEventListener('click', handleRoundAction);
 shareBtn.addEventListener('click', shareResult);
+shareImageBtn.addEventListener('click', shareImage);
 endAgainBtn.addEventListener('click', () => { playSound('click'); if (playMode === 'rush') { pendingChallenge = null; startRush(); } else startPracticeRound(); });
 backBtn.addEventListener('click', () => returnToMenu());
 goClassicBtn.addEventListener('click', () => goToMode('classic'));

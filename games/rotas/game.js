@@ -20,6 +20,7 @@ import { countryName, acceptedAnswers, normalize } from '../../js/country-names.
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
 import { copyText, siteUrl, challengeUrl } from '../../js/share.js';
+import { openShareDialog } from '../../js/share-card.js';
 
 const BORDERS_URL = new URL('../../data/world-borders.json', import.meta.url);
 const MAP_URL = new URL('../../data/world-map.json', import.meta.url);
@@ -610,6 +611,7 @@ function renderResult() {
     $('ideal-route').textContent = names(idealPath);
 
     $('share-btn').classList.toggle('hidden', mode !== 'daily' && !ended.won);
+    $('share-image-btn').classList.toggle('hidden', mode !== 'daily' && !ended.won);
     $('play-again-btn').textContent = t(mode === 'daily' ? 'rotas.practice' : 'rotas.playAgain');
     $('share-status').textContent = copied ? t('rotas.res.copied') : '';
 }
@@ -644,6 +646,25 @@ function shareText() {
         t('rotas.res.shareLine', { n: guesses.length, ideal: minPath }),
         t('rotas.challenge.shareLine', { url: challengeUrl({ c: routeCode, s: guesses.length }) }),
     ].join('\n');
+}
+
+// Imagem 9:16 do resultado (janela com prévia e escolha de layout; veja js/share-card.js).
+function shareImage() {
+    playSound('click');
+    openShareDialog({
+        kind: 'rotas',
+        fileName: mode === 'daily' ? `ggeo-rotas-diario-${daily.date}` : 'ggeo-rotas',
+        data: {
+            from: nameOf[startId],
+            to: nameOf[endId],
+            daily: mode === 'daily',
+            won: !!(ended && ended.won),
+            n: guesses.length,
+            ideal: minPath,
+            streak: mode === 'daily' ? currentStreak() : 0,
+            steps: guesses.map((id) => ({ name: nameOf[id], state: guessStates[id] })),
+        },
+    });
 }
 
 async function shareResult() {
@@ -891,6 +912,7 @@ hintBtns.forEach((button, index) => {
 guessBtn.addEventListener('click', () => { suggestions.close(); submitTyped(); inputEl.focus(); });
 $('play-again-btn').addEventListener('click', () => { playSound('click'); startPractice(); });
 $('share-btn').addEventListener('click', shareResult);
+$('share-image-btn').addEventListener('click', shareImage);
 
 // Configurações (tamanho da fonte)
 function toggleSettings(force) {
