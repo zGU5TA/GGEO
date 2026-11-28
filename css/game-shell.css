@@ -362,3 +362,54 @@ p.subtitle,
 @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
 }
+
+
+/* ---------- Pesquisa flutuante no celular (js/floating-search.js) ---------- */
+
+.search-bar { display: none; }
+
+.search-panel.is-floating {
+    position: fixed;
+    top: 0;                        /* o JS ajusta pela viewport visual (iOS) */
+    left: 0;
+    right: 0;
+    z-index: 60;
+    padding: 0.5rem max(1rem, calc((100% - 40rem) / 2)) 0.75rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-control);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.search-panel.is-floating .search-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.search-context {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.8em;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-close {
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -0.4rem -0.5rem -0.4rem 0;
+    background: none;
+    border: 0;
+    color: var(--fg);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+/* sugestões: só o que cabe entre o painel e o teclado */
+.search-panel.is-floating .suggestions {
+    max-height: max(6rem, min(11rem, calc(var(--vv-h, 100vh) - var(--dock-h, 0px) - 1rem)));
+}

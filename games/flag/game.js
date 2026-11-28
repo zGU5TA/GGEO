@@ -1,5 +1,6 @@
 import { t, setText, getLang, initI18n, onLangChange } from '../../js/i18n.js';
 import { countryName, capitalName, matchesCountry, acceptedAnswers } from '../../js/country-names.js';
+import { initFloatingSearch } from '../../js/floating-search.js';
 import { createAutocomplete } from '../../js/autocomplete.js';
 import { playSound, initSoundToggle } from '../../js/sound.js';
 import { copyText, siteUrl, challengeUrl } from '../../js/share.js';
@@ -129,6 +130,14 @@ const shareStatus = document.getElementById('share-status');
 const flagCanvas = document.getElementById('flag-canvas');
 const guessList = document.getElementById('guess-list');
 const revealCaption = document.getElementById('reveal-caption');
+
+// No celular, o campo de resposta flutua no topo enquanto o teclado está aberto (ver js/floating-search.js).
+initFloatingSearch({
+    panel: gameArea,
+    input: guessInput,
+    anchor: document.querySelector('.flag-container'),
+    getContext: () => [...document.querySelectorAll('.stats-container > div:not(.hidden)')].map((item) => item.textContent.replace(/\s+/g, ' ').trim()).join(' · '),
+});
 const goClassicBtn = document.getElementById('go-classic-btn');
 const goRushBtn = document.getElementById('go-rush-btn');
 const backBtn = document.getElementById('back-btn');

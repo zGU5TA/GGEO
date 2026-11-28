@@ -227,5 +227,6 @@
   "card.landLink": "conecta por tierra",
   "card.detour": "desvío",
   "card.destLower": "destino",
-  "card.noLinkLower": "sin conexión"
+  "card.noLinkLower": "sin conexión",
+  "search.close": "Cerrar búsqueda"
 }

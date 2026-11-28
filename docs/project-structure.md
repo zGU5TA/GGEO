@@ -246,3 +246,7 @@ Tudo vai na URL, sem servidor nem conta (`challengeUrl()` em `js/share.js`).
 ## Dicas do Flag
 
 Diário e Treino mostram capital, continente e população aproximada, sem penalidade (não afetam sequência nem compartilhamento).
+
+## Pesquisa flutuante no celular
+
+`js/floating-search.js` (usado por Flag e Rotas): ao tocar no campo de resposta numa tela de toque (`pointer: coarse`), o campo vira um painel fixo no topo da área visível (como o Travle), com um resumo e o botão ✕, e a bandeira/mapa fica logo abaixo, acima do teclado. A posição usa `window.visualViewport` (necessário no iOS, onde o teclado não encolhe a página); uma reserva mantém a altura original do campo, então nada pula. No computador nada muda. O painel só abre por toque da pessoa, nunca pelo foco automático do jogo.

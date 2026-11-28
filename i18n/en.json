@@ -227,5 +227,6 @@
   "card.landLink": "links by land",
   "card.detour": "detour",
   "card.destLower": "destination",
-  "card.noLinkLower": "no link"
+  "card.noLinkLower": "no link",
+  "search.close": "Close search"
 }

@@ -227,5 +227,6 @@
   "card.landLink": "陆路相连",
   "card.detour": "绕路",
   "card.destLower": "终点",
-  "card.noLinkLower": "无陆路"
+  "card.noLinkLower": "无陆路",
+  "search.close": "关闭搜索"
 }

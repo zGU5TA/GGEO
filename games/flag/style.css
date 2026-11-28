@@ -260,3 +260,12 @@
 /* Link de desafio do Rush */
 .challenge-banner { border: 1px solid var(--accent-ink); padding: 0.6rem 0.75rem; margin: 0 0 0.75rem; text-align: center; }
 .challenge-banner p { margin: 0 0 0.5rem; }
+
+/* Pesquisa flutuante: a bandeira encolhe só se faltar espaço entre o painel e o teclado */
+.search-floating .flag-container,
+.search-floating .flag-container:has(.flag-canvas:not(.hidden)) {
+    height: clamp(6.5rem, calc(var(--vv-h, 100vh) - var(--dock-h, 0px) - 2rem), 11.875rem);
+    min-height: 0;
+}
+.search-floating .flag-canvas { max-height: 100%; }
+.guess-list { margin-top: 0.25rem; }

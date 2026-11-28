@@ -227,5 +227,6 @@
   "card.landLink": "liga por terra",
   "card.detour": "desvio",
   "card.destLower": "destino",
-  "card.noLinkLower": "sem ligação"
+  "card.noLinkLower": "sem ligação",
+  "search.close": "Fechar pesquisa"
 }

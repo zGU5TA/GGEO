@@ -97,7 +97,8 @@ export function createAutocomplete({ input, list, getEntries, isExcluded = () =>
         });
         list.classList.remove('hidden');
         input.setAttribute('aria-expanded', 'true');
-        list.scrollIntoView({ block: 'nearest' });   // no celular, garante que a lista apareça inteira
+        // (com a pesquisa flutuante a lista já cabe entre o painel e o teclado: sem rolar a página)
+        if (!input.closest('.is-floating')) list.scrollIntoView({ block: 'nearest' });
     }
 
     input.setAttribute('aria-expanded', 'false');
