@@ -264,8 +264,11 @@
 /* Pesquisa flutuante: a bandeira encolhe só se faltar espaço entre o painel e o teclado */
 .search-floating .flag-container,
 .search-floating .flag-container:has(.flag-canvas:not(.hidden)) {
-    height: clamp(6.5rem, calc(var(--vv-h, 100vh) - var(--dock-h, 0px) - 2rem), 11.875rem);
+    height: clamp(6rem, var(--anchor-max-h, 11.875rem), 11.875rem);
     min-height: 0;
 }
 .search-floating .flag-canvas { max-height: 100%; }
 .guess-list { margin-top: 0.25rem; }
+
+/* Rush com o painel junto ao teclado: "Pular" mais baixo para o painel ficar compacto */
+.search-panel.is-bottom #skip-btn { margin-top: 0.4rem; padding-block: 0.4rem; }

@@ -136,7 +136,9 @@ initFloatingSearch({
     panel: gameArea,
     input: guessInput,
     anchor: document.querySelector('.flag-container'),
-    getContext: () => [...document.querySelectorAll('.stats-container > div:not(.hidden)')].map((item) => item.textContent.replace(/\s+/g, ' ').trim()).join(' · '),
+    placement: () => (playMode === 'rush' ? 'bottom' : 'top'),   // Rush: compacto junto ao teclado (a bandeira fica no alto)
+    getContext: () => (playMode === 'rush' && document.getElementById('message').textContent.trim())
+        || [...document.querySelectorAll('.stats-container > div:not(.hidden)')].map((item) => item.textContent.replace(/\s+/g, ' ').trim()).join(' · '),
 });
 const goClassicBtn = document.getElementById('go-classic-btn');
 const goRushBtn = document.getElementById('go-rush-btn');
@@ -525,7 +527,6 @@ function startRush() {
     clearInterval(rushClock);
     currentCountry = null;
     rushAdvance();
-    guessInput.focus();
 }
 
 // Mostra a próxima bandeira (já sorteada e pré-carregada, para não perder tempo de rede).
@@ -587,7 +588,6 @@ function rushSkip() {
     rush.errors++;
     setMessage({ key: 'flag.rush.skipped', country: currentCountry }, 'error');
     rushAdvance();
-    guessInput.focus();
 }
 
 function endRush() {
@@ -623,6 +623,18 @@ function endRush() {
 // ---------------------------------------------------------------------------
 // Desafio diário (bandeira escondida, revelada pelas cores dos palpites)
 // ---------------------------------------------------------------------------
+
+// Foco automático só no computador: no celular ele abriria o teclado sozinho (e cobriria o jogo).
+// Quem digita no celular toca no campo; o foco que já existe é preservado, e nunca é forçado de volta.
+const canAutoFocus = !window.matchMedia('(pointer: coarse)').matches;
+function focusInput() {
+    if (canAutoFocus) guessInput.focus({ preventScroll: true });
+}
+
+// Botões ao lado do campo não tiram o foco dele: o teclado não fecha entre uma resposta e a próxima.
+for (const button of [guessBtn, skipBtn]) {
+    button.addEventListener('mousedown', (event) => event.preventDefault());
+}
 
 // Estado da rodada com revelação: o diário (salvo) ou o treino (só na memória).
 const state = () => (playMode === 'daily' ? daily : practice);
@@ -704,7 +716,7 @@ async function loadBoard() {
         if (token !== boardToken) return;
         flagReady = true;
         drawBoard();
-        if (state().done) showRevealEnd(); else guessInput.focus({ preventScroll: true });
+        if (state().done) showRevealEnd(); else focusInput();
     } catch (error) {
         console.error('Falha ao carregar a bandeira do dia:', error);
         flagReady = false;

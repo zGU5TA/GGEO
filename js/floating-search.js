@@ -23,13 +23,14 @@
  *       input,        // o <input>
  *       anchor,       // o que precisa continuar visível (bandeira ou mapa)
  *       getContext,   // () => texto do resumo mostrado no painel
+ *       placement,    // () => 'top' | 'bottom' (opcional; padrão 'top')
  *   });
  */
 import { t } from './i18n.js';
 
 const coarse = window.matchMedia('(pointer: coarse)');
 
-export function initFloatingSearch({ panel, input, anchor, getContext = () => '' }) {
+export function initFloatingSearch({ panel, input, anchor, getContext = () => '', placement = () => 'top' }) {
     const root = document.documentElement;
     const viewport = window.visualViewport;
 
@@ -59,12 +60,12 @@ export function initFloatingSearch({ panel, input, anchor, getContext = () => ''
         height: viewport ? viewport.height : window.innerHeight,
     });
 
-    // Rola só o necessário para a bandeira/mapa ficar entre o painel e o teclado.
-    function keepAnchorVisible() {
+    // Rola só o necessário para a bandeira/mapa ficar fora do painel e acima do teclado.
+    function keepAnchorVisible(bottom) {
         const view = visible();
         const rect = anchor.getBoundingClientRect();
-        const min = view.top + panel.offsetHeight + 8;
-        const max = view.top + view.height - 8;
+        const min = bottom ? view.top + 8 : view.top + panel.offsetHeight + 8;
+        const max = bottom ? view.top + view.height - panel.offsetHeight - 8 : view.top + view.height - 8;
         let delta = 0;
         if (rect.top < min) delta = rect.top - min;
         else if (rect.bottom > max) delta = Math.min(rect.bottom - max, rect.top - min);
@@ -74,11 +75,29 @@ export function initFloatingSearch({ panel, input, anchor, getContext = () => ''
     function update() {
         if (!floating) return;
         const view = visible();
-        panel.style.top = `${view.top}px`;
-        context.textContent = getContext();
-        root.style.setProperty('--dock-h', `${panel.offsetHeight}px`);
+        const bottom = placement() === 'bottom';
+        panel.classList.toggle('is-bottom', bottom);
+        if (bottom) {
+            // distância entre o fim da página "de layout" e o fim da parte visível = altura do teclado (iOS)
+            panel.style.top = 'auto';
+            panel.style.bottom = `${Math.max(0, window.innerHeight - (view.top + view.height))}px`;
+        } else {
+            panel.style.bottom = '';
+            panel.style.top = `${view.top}px`;
+        }
+        const text = getContext();
+        context.textContent = text;
+        panel.classList.toggle('has-context', !!text);
+        // Espaço que a bandeira/mapa pode ocupar: o jogo encolhe a imagem em vez de rolar a página.
+        const panelH = panel.offsetHeight;
+        const rect = anchor.getBoundingClientRect();
+        const room = bottom && rect.top > view.top
+            ? view.top + view.height - panelH - 8 - rect.top
+            : view.height - panelH - 16;
+        root.style.setProperty('--anchor-max-h', `${Math.max(96, room)}px`);
+        root.style.setProperty('--dock-h', `${panelH}px`);
         root.style.setProperty('--vv-h', `${view.height}px`);
-        keepAnchorVisible();
+        requestAnimationFrame(() => floating && keepAnchorVisible(bottom));
     }
 
     function open() {
@@ -107,7 +126,10 @@ export function initFloatingSearch({ panel, input, anchor, getContext = () => ''
         panel.classList.remove('is-floating');
         root.classList.remove('search-floating');
         panel.style.top = '';
+        panel.style.bottom = '';
+        panel.classList.remove('is-bottom', 'has-context');
         slot.style.minHeight = '';
+        root.style.removeProperty('--anchor-max-h');
         root.style.removeProperty('--dock-h');
         root.style.removeProperty('--vv-h');
     }

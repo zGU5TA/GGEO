@@ -777,7 +777,7 @@ function renderRound() {
     renderAll();
     drawMap();
     focusOnRoute();
-    if (!ended) inputEl.focus({ preventScroll: true });
+    if (!ended && !window.matchMedia('(pointer: coarse)').matches) inputEl.focus({ preventScroll: true });   // celular: sem teclado automático
 }
 
 function startPractice() {
@@ -909,7 +909,8 @@ hintBtns.forEach((button, index) => {
 
 // ================= Eventos =================
 
-guessBtn.addEventListener('click', () => { suggestions.close(); submitTyped(); inputEl.focus(); });
+guessBtn.addEventListener('mousedown', (event) => event.preventDefault());   // o botão não tira o foco do campo
+guessBtn.addEventListener('click', () => { suggestions.close(); submitTyped(); });
 $('play-again-btn').addEventListener('click', () => { playSound('click'); startPractice(); });
 $('share-btn').addEventListener('click', shareResult);
 $('share-image-btn').addEventListener('click', shareImage);

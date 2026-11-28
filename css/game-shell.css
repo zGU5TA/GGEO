@@ -413,3 +413,17 @@ p.subtitle,
 .search-panel.is-floating .suggestions {
     max-height: max(6rem, min(11rem, calc(var(--vv-h, 100vh) - var(--dock-h, 0px) - 1rem)));
 }
+
+/* Posicionamento "bottom" (Rush): painel compacto colado ao teclado; o resumo só aparece quando há texto */
+.search-panel.is-floating.is-bottom {
+    top: auto;
+    bottom: 0;
+    padding-top: 0.5rem;
+    border-bottom: 0;
+    border-top: 1px solid var(--border-control);
+    box-shadow: 0 -8px 18px rgba(0, 0, 0, 0.45);
+}
+.search-panel.is-floating.is-bottom .search-bar { display: none; margin-bottom: 0.3rem; }
+.search-panel.is-floating.is-bottom.has-context .search-bar { display: flex; }
+.search-panel.is-floating.is-bottom .search-close { min-height: 36px; margin-block: -0.3rem; }
+.search-panel.is-floating.is-bottom .suggestions { top: auto; bottom: 100%; border-top: 1px solid var(--fg); border-bottom: 0; }
